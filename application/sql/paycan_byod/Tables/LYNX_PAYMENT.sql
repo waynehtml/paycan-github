@@ -1,0 +1,26 @@
+﻿CREATE TABLE [paycan_byod].[LYNX_PAYMENT] (
+    [LYNX_PAYMENT_ID]             BIGINT          NOT NULL,
+    [BATCH_ID]                    INT             NOT NULL,
+    [VALIDATION_STATUS]           BIT             NULL,
+    [PAYMENT_ID]                  BIGINT          NULL,
+    [SYSTEM_REFERENCE]            VARCHAR (25)    NULL,
+    [CYCLE_DATE]                  DATE            NULL,
+    [PAYER_INSTITUTION]           VARCHAR (10)    NULL,
+    [PAYER_PARTICIPANT]           VARCHAR (10)    NULL,
+    [PAYER_REFERENCE]             VARCHAR (25)    NULL,
+    [SETTLEMENT_MECHANISM_CD]     VARCHAR (10)    NULL,
+    [RECEIVER_INSTITUTION]        VARCHAR (10)    NULL,
+    [RECEIVER_PARTICIPANT]        VARCHAR (10)    NULL,
+    [SWIFT_MSG_TYPE_CD]           VARCHAR (10)    NULL,
+    [TRANSACTION_TYPE]            VARCHAR (255)   NULL,
+    [AMOUNT]                      DECIMAL (18, 2) NULL,
+    [PRIORITY]                    BIGINT          NULL,
+    [LAST_MODIFIED_TS]            DATETIME        NULL,
+    [STATUS_TYPE_CD]              VARCHAR (15)    NULL,
+    [STATUS_CHANGE_TIME_TS]       DATETIME        NULL,
+    [STATUS_REASON]               VARCHAR (50)    NULL,
+    [STATUS_MILLISECOND_DURATION] BIGINT          NULL,
+    [STATUS_TYPE_CATEGORY]        VARCHAR (256)   NULL,
+    PRIMARY KEY CLUSTERED ([LYNX_PAYMENT_ID] ASC, [BATCH_ID] ASC)
+);
+

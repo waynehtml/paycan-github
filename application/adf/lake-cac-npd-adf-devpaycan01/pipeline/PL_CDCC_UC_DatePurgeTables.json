@@ -1,0 +1,74 @@
+{
+	"name": "PL_CDCC_UC_DatePurgeTables",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delete with Date Range",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cdcc/uc_schema/tables/tb_cdcc_DatePurgeTables",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						},
+						"schema_name": {
+							"value": "@pipeline().parameters.schema_name",
+							"type": "Expression"
+						},
+						"table_names": {
+							"value": "@pipeline().parameters.table_names",
+							"type": "Expression"
+						},
+						"column_name": {
+							"value": "@pipeline().parameters.column_name",
+							"type": "Expression"
+						},
+						"delete_from_date": {
+							"value": "@pipeline().parameters.delete_from_date",
+							"type": "Expression"
+						},
+						"delete_end_date": {
+							"value": "@pipeline().parameters.delete_end_date",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"schema_name": {
+				"type": "string"
+			},
+			"table_names": {
+				"type": "string"
+			},
+			"column_name": {
+				"type": "string"
+			},
+			"delete_from_date": {
+				"type": "string"
+			},
+			"delete_end_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "CDCC/UC"
+		},
+		"annotations": []
+	}
+}

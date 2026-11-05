@@ -1,0 +1,185 @@
+{
+	"name": "PL_ACSS_Datalake_to_SQLDB",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup Filenames",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_config_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_config_file_ingestion",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Filenames",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup Filenames').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Upload to SQL",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "ParquetSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"wildcardFolderPath": {
+											"value": "@concat(pipeline().parameters.prm_curated_directory,'/',pipeline().parameters.prm_date_type,'/',item().name,'/')",
+											"type": "Expression"
+										},
+										"wildcardFileName": "*.parquet",
+										"enablePartitionDiscovery": false
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "@{concat('TRUNCATE TABLE [paycan_restricted_standardized].',toUpper(item().name))}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Curated_Parquet_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"Container": {
+											"value": "@pipeline().parameters.prm_curated_container",
+											"type": "Expression"
+										},
+										"FolderPath": {
+											"value": "@pipeline().parameters.prm_curated_directory",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_SQL_Standardized_Tables",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableName": {
+											"value": "@toUpper(item().name)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_curated_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_curated_directory": {
+				"type": "string",
+				"defaultValue": "curated/paycan/acss_usbe"
+			},
+			"prm_config_container": {
+				"type": "string",
+				"defaultValue": "config-paycan"
+			},
+			"prm_config_directory": {
+				"type": "string",
+				"defaultValue": "acss"
+			},
+			"prm_config_file_tables_publish": {
+				"type": "string",
+				"defaultValue": "acss_files_ingestion.json"
+			},
+			"prm_date_type": {
+				"type": "string",
+				"defaultValue": "weekly"
+			},
+			"prm_config_file_ingestion": {
+				"type": "string",
+				"defaultValue": "acss_files_ingestion.json"
+			},
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2021-12-20"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": []
+	}
+}

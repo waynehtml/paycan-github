@@ -1,0 +1,21 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_OPERATING_SCHEDULE]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_OPERATING_SCHEDULE];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_OPERATING_SCHEDULE](
+	[LYNX_OPERATING_SCHEDULE_ID] [bigint] NOT NULL,
+	[BATCH_ID] [int] NOT NULL,
+	[VALIDATION_STATUS] [bit] NULL,
+	[WINDOW_LOG_ID] [bigint] NULL,
+	[CYCLE_DATE] [date] NULL,
+	[EVENT] [varchar](100) NULL,
+	[START_TS] [datetime] NULL,
+	[END_TS] [datetime] NULL,
+	[LAST_MODIFIED_TS] [datetime] NULL,
+	[DURATION] [bigint] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[LYNX_OPERATING_SCHEDULE_ID] ASC,
+	[BATCH_ID] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];
+

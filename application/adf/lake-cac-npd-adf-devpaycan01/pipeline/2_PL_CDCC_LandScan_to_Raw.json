@@ -1,0 +1,652 @@
+{
+	"name": "2_PL_CDCC_LandScan_to_Raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load Config File",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_config",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().globalParameters.gpm_cdcc_folder",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@string('files_ingestion.json')",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Copy to raw and uncompress",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "If raw folder exists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "@activity('Load Config File').output.firstRow.land_scan_folder_compressed",
+								"type": "Expression"
+							},
+							"wildcardFileName": {
+								"value": "@concat('*', pipeline().parameters.file_date, '.zip')",
+								"type": "Expression"
+							},
+							"deleteFilesAfterCompletion": false
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings",
+							"compressionProperties": {
+								"type": "ZipDeflateReadSettings",
+								"preserveZipFileNameAsFolder": false
+							}
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Land_ZIP_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@activity('Load Config File').output.firstRow.land_scan_container",
+							"directory": "@activity('Load Config File').output.firstRow.land_scan_folder_compressed",
+							"filename": "@null"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_FS_Raw_Binary",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@activity('Load Config File').output.firstRow.data_container",
+							"directory": {
+								"value": "@replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete from landing",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Copy to raw and uncompress",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_FS_Land_Scan",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@activity('Load Config File').output.firstRow.land_scan_container",
+							"directory": "@activity('Load Config File').output.firstRow.land_scan_folder_compressed",
+							"filename": "@null"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"wildcardFileName": {
+							"value": "@concat('*', pipeline().parameters.file_date, '.zip')",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "List the new raw folder",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Copy to raw and uncompress",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Raw_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@activity('Load Config File').output.firstRow.data_container",
+							"directory": {
+								"value": "@replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "If extra sub-folder exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "List the new raw folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(\n  equals(length(activity('List the new raw folder').output.childItems), 1),\n  equals(activity('List the new raw folder').output.childItems[0].type, 'Folder')\n)\n",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Copy to TEMP",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "PreserveHierarchy"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@activity('Load Config File').output.firstRow.data_container",
+										"directory": {
+											"value": "@concat(replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)\n, '/' , activity('List the new raw folder').output.childItems[0].name )\n",
+											"type": "Expression"
+										},
+										"filename": "@null"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@activity('Load Config File').output.firstRow.data_container",
+										"directory": {
+											"value": "@concat(replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)\n, '/', 'TEMP')",
+											"type": "Expression"
+										},
+										"filename": "@null"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy back",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Delete extra sub folder",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "PreserveHierarchy"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@activity('Load Config File').output.firstRow.data_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)\n, '/', 'TEMP')",
+											"type": "Expression"
+										},
+										"filename": "@null"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@activity('Load Config File').output.firstRow.data_container",
+										"directory": {
+											"value": "@replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete extra sub folder",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Copy to TEMP",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@activity('Load Config File').output.firstRow.data_container",
+										"directory": {
+											"value": "@concat(replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)\n, '/' , activity('List the new raw folder').output.childItems[0].name )\n",
+											"type": "Expression"
+										},
+										"filename": "@null"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						},
+						{
+							"name": "Delete TEMP folder",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Copy back",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@activity('Load Config File').output.firstRow.data_container",
+										"directory": {
+											"value": "@concat(replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date) , '/', 'TEMP')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "List Landing zone",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Load Config File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Land_ZIP_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@activity('Load Config File').output.firstRow.land_scan_container",
+							"directory": "@activity('Load Config File').output.firstRow.land_scan_folder_compressed",
+							"filename": "@null"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Filter required file",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "List Landing zone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('List Landing zone').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@contains(item().name, pipeline().parameters.file_date)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If landing zone not ready",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Filter required file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(length(activity('Filter required file').output.value),0)\n",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Landing zone - file is not ready",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "The required file does not exist in landing zone",
+								"errorCode": "4000"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If raw folder exist",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "If landing zone not ready",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_FS_Raw_Binary",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@activity('Load Config File').output.firstRow.data_container",
+							"directory": "@replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)"
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "If raw folder exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "If raw folder exist",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('If raw folder exist').output.exists",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Delete existing raw folder",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@activity('Load Config File').output.firstRow.data_container",
+										"directory": "@replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)",
+										"filename": "@null"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"file_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "CDCC/Dynamics"
+		},
+		"annotations": []
+	}
+}

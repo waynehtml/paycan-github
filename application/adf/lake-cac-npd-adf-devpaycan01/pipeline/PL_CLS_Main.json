@@ -1,0 +1,174 @@
+{
+	"name": "PL_CLS_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_CLS_Land_to_AV",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_CLS_Land_to_AV",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_land_container": {
+							"value": "@pipeline().parameters.prm_land_container",
+							"type": "Expression"
+						},
+						"prm_land_directory": {
+							"value": "@pipeline().parameters.prm_land_directory",
+							"type": "Expression"
+						},
+						"prm_av_directory": {
+							"value": "@pipeline().parameters.prm_av_directory",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_CLS_AV_to_Land",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_CLS_Land_to_AV",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_CLS_AV_to_Land",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_land_container": {
+							"value": "@pipeline().parameters.prm_land_container",
+							"type": "Expression"
+						},
+						"prm_land_directory": {
+							"value": "@pipeline().parameters.prm_land_directory",
+							"type": "Expression"
+						},
+						"prm_av_directory": {
+							"value": "@pipeline().parameters.prm_av_directory",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_CLS_Land_to_Raw",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_CLS_AV_to_Land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_CLS_Land_to_Raw",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_land_container": {
+							"value": "@pipeline().parameters.prm_land_container",
+							"type": "Expression"
+						},
+						"prm_land_directory": {
+							"value": "@pipeline().parameters.prm_land_directory",
+							"type": "Expression"
+						},
+						"prm_raw_container": {
+							"value": "@pipeline().parameters.prm_raw_container",
+							"type": "Expression"
+						},
+						"prm_raw_directory": {
+							"value": "@pipeline().parameters.prm_raw_directory",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_CLS_Raw_to_UC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_CLS_Land_to_Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_CLS_Raw_to_UC",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_environment": {
+							"value": "@pipeline().parameters.prm_environment",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_av_directory": {
+				"type": "string",
+				"defaultValue": "cls"
+			},
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory": {
+				"type": "string",
+				"defaultValue": "cls"
+			},
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/cls_group"
+			},
+			"prm_environment": {
+				"type": "string",
+				"defaultValue": "dev"
+			}
+		},
+		"folder": {
+			"name": "CLS/Dynamic"
+		},
+		"annotations": []
+	}
+}

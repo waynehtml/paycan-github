@@ -1,0 +1,28 @@
+﻿CREATE TABLE [paycan_restricted_standardized].[LYNX_CREDIT_POSITION] (
+    [LYNX_CREDIT_POSITION_ID] BIGINT          NOT NULL,
+    [BATCH_ID]                INT             NOT NULL,
+    [VALIDATION_STATUS]       BIT             NULL,
+    [CREDIT_ENTRY_ID]         BIGINT          NULL,
+    [CYCLE_DATE]              DATE            NULL,
+    [INSTITUTION_NUMBER]      BIGINT          NULL,
+    [INSTITUTION_IRN]         VARCHAR (255)   NULL,
+    [INSTITUTION_NAME]        VARCHAR (255)   NULL,
+    [PARTICIPANT_NUMBER]      BIGINT          NULL,
+    [PARTICIPANT_BIC]         VARCHAR (255)   NULL,
+    [PARTICIPANT_NAME]        VARCHAR (255)   NULL,
+    [INSTITUTION]             VARCHAR (100)   NULL,
+    [PARTICIPANT]             VARCHAR (10)    NULL,
+    [EVENT_TS]                DATETIME        NULL,
+    [TRIGGER_CD]              VARCHAR (15)    NULL,
+    [TRIGGER_NAME]            VARCHAR (100)   NULL,
+    [TOTAL_LIMIT]             DECIMAL (22, 2) NULL,
+    [TOTAL_AVAILABLE]         DECIMAL (22, 2) NULL,
+    [ENTRY_TYPE_CD]           VARCHAR (15)    NULL,
+    [ENTRY_TYPE_NAME]         VARCHAR (100)   NULL,
+    [ENTRY_AMOUNT]            DECIMAL (22, 2) NULL,
+    [LAST_MODIFIED_TS]        DATETIME        NULL,
+    [ingestion_date]          DATETIME        NULL,
+    [batch_date]              VARCHAR (10)    NULL,
+    PRIMARY KEY CLUSTERED ([LYNX_CREDIT_POSITION_ID] ASC, [BATCH_ID] ASC)
+);
+

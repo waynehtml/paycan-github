@@ -1,0 +1,41 @@
+{
+	"name": "DS_ADSLG2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADSLG2",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"storage": {
+					"value": "@dataset().storage",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"storage": {
+				"type": "string"
+			},
+			"container": {
+				"type": "string"
+			},
+			"directory": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().directory",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

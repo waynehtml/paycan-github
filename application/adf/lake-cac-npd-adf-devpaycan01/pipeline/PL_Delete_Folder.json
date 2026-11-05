@@ -1,0 +1,93 @@
+{
+	"name": "PL_Delete_Folder",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set storage account",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_storage_account",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_land_or_lake, 1),pipeline().globalParameters.gpm_storage_config,pipeline().globalParameters.gpm_storage)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Delete",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Set storage account",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_ADSLG2",
+						"type": "DatasetReference",
+						"parameters": {
+							"storage": {
+								"value": "@variables('var_storage_account')",
+								"type": "Expression"
+							},
+							"container": {
+								"value": "@pipeline().parameters.prm_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_directory",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_land_or_lake": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_container": {
+				"type": "string",
+				"defaultValue": "data"
+			},
+			"prm_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/kaiko/Trade"
+			}
+		},
+		"variables": {
+			"var_storage_account": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": []
+	}
+}

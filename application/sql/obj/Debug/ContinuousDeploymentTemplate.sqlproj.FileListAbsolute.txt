@@ -1,0 +1,6 @@
+B:\Dev\gits\paycan3\paycan\application\sql\bin\Debug\ContinuousDeploymentTemplate.dacpac
+B:\Dev\gits\paycan3\paycan\application\sql\bin\Debug\ContinuousDeploymentTemplate.dll
+B:\Dev\gits\paycan3\paycan\application\sql\bin\Debug\ContinuousDeploymentTemplate.pdb
+B:\Dev\gits\paycan3\paycan\application\sql\obj\Debug\ContinuousDeploymentTemplate.sqlproj.AssemblyReference.cache
+B:\Dev\gits\paycan3\paycan\application\sql\obj\Debug\ContinuousDeploymentTemplate.dll
+B:\Dev\gits\paycan3\paycan\application\sql\obj\Debug\ContinuousDeploymentTemplate.pdb

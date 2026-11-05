@@ -1,0 +1,42 @@
+{
+	"name": "ACSS_Monthly",
+	"properties": {
+		"description": "Pulling ACSS monthly extracts at 9AM on the 3rd of every month. (the extracts is available on 7AM)",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ACSS_Monthly",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"prm_adjust": 0,
+					"prm_run_extract_from_GCS": 1,
+					"prm_run_AV_to_land": 1,
+					"prm_run_land_to_raw": 1
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2022-02-14T14:42:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						9
+					],
+					"monthDays": [
+						3
+					]
+				}
+			}
+		}
+	}
+}

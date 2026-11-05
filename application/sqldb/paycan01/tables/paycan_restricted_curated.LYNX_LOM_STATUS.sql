@@ -1,0 +1,20 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_LOM_STATUS]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_LOM_STATUS];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_LOM_STATUS](
+	[LYNX_LOM_STATUS_ID] [bigint] NOT NULL,
+	[BATCH_ID] [int] NOT NULL,
+	[VALIDATION_STATUS] [bit] NULL,
+	[CYCLE_DATE] [date] NULL,
+	[INSTITUTION] [varchar](100) NULL,
+	[PARTICIPANT] [varchar](100) NULL,
+	[SETTLEMENT_MECHANISM_CD] [varchar](20) NULL,
+	[STATUS_CD] [varchar](10) NULL,
+	[EFFECTIVE_TS] [datetime] NULL,
+	[LAST_MODIFIED_TS] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[LYNX_LOM_STATUS_ID] ASC,
+	[BATCH_ID] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];

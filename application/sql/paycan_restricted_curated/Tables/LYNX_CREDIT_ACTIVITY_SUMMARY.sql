@@ -1,0 +1,23 @@
+﻿CREATE TABLE [paycan_restricted_curated].[LYNX_CREDIT_ACTIVITY_SUMMARY] (
+    [BATCH_ID]           INT             NOT NULL,
+    [CREDIT_ACTIVITY_ID] BIGINT          NOT NULL,
+    [CYCLE_DATE]         DATE            NULL,
+    [INSTITUTION]        VARCHAR (100)   NULL,
+    [PARTICIPANT]        VARCHAR (100)   NULL,
+    [TOTAL_AMOUNT]       DECIMAL (22, 2) NULL,
+    [EARMARKED_AMOUNT]   DECIMAL (22, 2) NULL,
+    [EARMARKED_LOM]      VARCHAR (100)   NULL,
+    [REGISTERED]         TINYINT         NULL,
+    [PROCESSED]          TINYINT         NULL,
+    [REGISTERED_TIME]    DATETIME        NULL,
+    [PROCESSED_TIME]     DATETIME        NULL,
+    [ingestion_date]     DATETIME        NULL,
+    [batch_date]         VARCHAR (10)    NULL,
+    CONSTRAINT [PK_LYNX_CREDIT_ACTIVITY_SUMMARY_BATCH_ID_CREDIT_ACTIVITY_ID] PRIMARY KEY CLUSTERED ([BATCH_ID] ASC, [CREDIT_ACTIVITY_ID] ASC)
+);
+
+
+GO
+CREATE NONCLUSTERED INDEX [IDX_LYNX_CREDIT_ACTIVITY_SUMMARY_batch_date]
+    ON [paycan_restricted_curated].[LYNX_CREDIT_ACTIVITY_SUMMARY]([batch_date] ASC);
+

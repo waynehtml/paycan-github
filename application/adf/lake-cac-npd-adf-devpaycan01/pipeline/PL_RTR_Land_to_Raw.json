@@ -1,0 +1,177 @@
+{
+	"name": "PL_RTR_Land_to_Raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup files in land",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_config_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_filenames",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach filename in land - copy to raw",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup files in land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup files in land').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Move Data to Raw Zone",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_landing_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_landing_directory,'/',pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.json')",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_raw_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_raw_directory,'/',pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.json')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			},
+			"prm_landing_container": {
+				"type": "string"
+			},
+			"prm_landing_directory": {
+				"type": "string"
+			},
+			"prm_raw_container": {
+				"type": "string"
+			},
+			"prm_raw_directory": {
+				"type": "string"
+			},
+			"prm_config_container": {
+				"type": "string"
+			},
+			"prm_config_directory": {
+				"type": "string"
+			},
+			"prm_filenames": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "RTR/Dynamic"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:28:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

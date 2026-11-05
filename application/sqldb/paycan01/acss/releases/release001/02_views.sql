@@ -1,0 +1,24 @@
+CREATE OR ALTER VIEW [paycan_restricted_standardized].[ACSS_USBE_SETS_VIEW]
+AS SELECT [system_code]
+	,[settlement_date]
+	,[sending_dc_irn]
+	,[sending_dc_name]
+	,[receiving_dc_irn]
+	,[receiving_dc_name]
+	,[sets_volume]
+	,[sets_value]
+FROM [paycan_restricted_standardized].[ACSS_USBE_SETS];
+
+
+CREATE OR ALTER VIEW [paycan_restricted_standardized].[ACSS_USBE_VOL_VAL_VIEW]
+AS SELECT [system_code]
+	,[settlement_date]
+	,[sending_dc_irn]
+	,[sending_dc_name]
+	,[receiving_dc_irn]
+	,[receiving_dc_name]
+	,[stream_code]
+	,[stream_name]
+	,[volume]
+	,[value]
+FROM [paycan_restricted_standardized].[ACSS_USBE_VOL_VAL];

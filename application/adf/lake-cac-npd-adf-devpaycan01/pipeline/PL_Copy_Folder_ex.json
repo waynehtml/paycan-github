@@ -1,0 +1,478 @@
+{
+	"name": "PL_Copy_Folder_ex",
+	"properties": {
+		"description": "Copy one or multiple from source to destination, for example, with prm_src_directory = kaiko-sync/Test and prm_dst_directory =  raw/external/kaiko/, Test folder will be created in the destination folder and everything inside Test will be copied over. The difference with PL_Copy_Folder is the folder with same name as the source will be automatically created in the destination. No need to be specified in destination like PL_Copy_Folder.",
+		"activities": [
+			{
+				"name": "Set source storage account",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_src_storage_account",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_src_land_or_lake, 1),pipeline().globalParameters.gpm_storage_config,pipeline().globalParameters.gpm_storage)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set destination storage account",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_dst_storage_account",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_dst_land_or_lake, 1),pipeline().globalParameters.gpm_storage_config,pipeline().globalParameters.gpm_storage)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set base directory",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set source directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_directory_base",
+					"value": {
+						"value": "@substring(variables('var_src_directory'), 0, lastIndexOf(variables('var_src_directory'), '/'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set directory pattern",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set source directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_directory_pattern",
+					"value": {
+						"value": "@substring(variables('var_src_directory'), add(lastIndexOf(variables('var_src_directory'), '/') , 1), sub(length(variables('var_src_directory')), add(lastIndexOf(variables('var_src_directory'), '/'), 1)))\n\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Directory pattern switch",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "list subdirs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@if(contains(variables('var_directory_pattern'),','),'comma',if(contains(variables('var_directory_pattern'),'*'),'asterisk','default'))",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "comma",
+							"activities": [
+								{
+									"name": "Filter in multiple folders",
+									"type": "Filter",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"items": {
+											"value": "@activity('list subdirs').output.childItems",
+											"type": "Expression"
+										},
+										"condition": {
+											"value": "@contains(split(variables('var_directory_pattern'), ','), item().name)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set directory items for multiple folders",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Filter in multiple folders",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_directory_items",
+										"value": {
+											"value": "@activity('Filter in multiple folders').output.value",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "asterisk",
+							"activities": [
+								{
+									"name": "Filter in all folders",
+									"type": "Filter",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"items": {
+											"value": "@activity('list subdirs').output.childItems",
+											"type": "Expression"
+										},
+										"condition": {
+											"value": "@equals(item().type,'Folder')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set directory items for all subfolders",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Filter in all folders",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_directory_items",
+										"value": {
+											"value": "@activity('Filter in all folders').output.value",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "Filter in single folder",
+							"type": "Filter",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"items": {
+									"value": "@activity('list subdirs').output.childItems",
+									"type": "Expression"
+								},
+								"condition": {
+									"value": "@equals(item().name, variables('var_directory_pattern'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set directory items for single folder",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Filter in single folder",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_directory_items",
+								"value": {
+									"value": "@activity('Filter in single folder').output.value",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "list subdirs",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Set source storage account",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set base directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set directory pattern",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set destination storage account",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_ADSLG2",
+						"type": "DatasetReference",
+						"parameters": {
+							"storage": {
+								"value": "@variables('var_src_storage_account')",
+								"type": "Expression"
+							},
+							"container": {
+								"value": "@pipeline().parameters.prm_src_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@variables('var_directory_base')",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach directory",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Directory pattern switch",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('var_directory_items')",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Copy",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"wildcardFolderPath": {
+											"value": "@pipeline().parameters.prm_src_directory",
+											"type": "Expression"
+										},
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_ADSLG2",
+									"type": "DatasetReference",
+									"parameters": {
+										"storage": {
+											"value": "@variables('var_src_storage_account')",
+											"type": "Expression"
+										},
+										"container": {
+											"value": "@pipeline().parameters.prm_src_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(variables('var_directory_base'),'/',item().name)",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADSLG2",
+									"type": "DatasetReference",
+									"parameters": {
+										"storage": {
+											"value": "@variables('var_dst_storage_account')",
+											"type": "Expression"
+										},
+										"container": {
+											"value": "@pipeline().parameters.prm_dst_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_dst_directory,'/',item().name)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Set source directory",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_src_directory",
+					"value": {
+						"value": "@if(contains(pipeline().parameters.prm_src_directory,'/'), pipeline().parameters.prm_src_directory, concat(pipeline().parameters.prm_src_directory,'/*'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_src_land_or_lake": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_src_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_src_directory": {
+				"type": "string",
+				"defaultValue": "kaiko-sync/Test"
+			},
+			"prm_dst_land_or_lake": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_dst_container": {
+				"type": "string",
+				"defaultValue": "data"
+			},
+			"prm_dst_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/kaiko/"
+			}
+		},
+		"variables": {
+			"var_src_storage_account": {
+				"type": "String"
+			},
+			"var_dst_storage_account": {
+				"type": "String"
+			},
+			"var_directory_base": {
+				"type": "String"
+			},
+			"var_directory_pattern": {
+				"type": "String"
+			},
+			"var_directory_items": {
+				"type": "Array"
+			},
+			"var_src_directory": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": []
+	}
+}

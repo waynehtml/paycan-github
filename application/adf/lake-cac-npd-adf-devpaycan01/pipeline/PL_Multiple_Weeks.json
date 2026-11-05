@@ -1,0 +1,118 @@
+{
+	"name": "PL_Multiple_Weeks",
+	"properties": {
+		"activities": [
+			{
+				"name": "Iterate_Weekly_Dates",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Weekly_dates",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Weekly_dates').output.firstRow.weekly_dates",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "PL_ACSS_Weekly",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ACSS_Weekly",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@item().date",
+										"type": "Expression"
+									},
+									"run_historical": {
+										"value": "@int(pipeline().parameters.run_historical)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Weekly_dates",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.config_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.weekly_dates",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"run_historical": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"config_container": {
+				"type": "string",
+				"defaultValue": "config-paycan"
+			},
+			"config_directory": {
+				"type": "string",
+				"defaultValue": "acss"
+			},
+			"weekly_dates": {
+				"type": "string",
+				"defaultValue": "weekly_dates.json"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Control"
+		},
+		"annotations": []
+	}
+}

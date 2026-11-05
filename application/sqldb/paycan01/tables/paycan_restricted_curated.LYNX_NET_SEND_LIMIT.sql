@@ -1,0 +1,32 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_NET_SEND_LIMIT]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_NET_SEND_LIMIT];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_NET_SEND_LIMIT](
+	[LYNX_NET_SEND_LIMIT_ID] [bigint] NOT NULL,
+	[BATCH_ID] [int] NOT NULL,
+	[VALIDATION_STATUS] [bit] NULL,
+	[NET_SEND_LIMIT_ID] [bigint] NULL,
+	[CYCLE_DATE] [date] NULL,
+	[REGISTERED_TS] [datetime] NULL,
+	[FINAL_TS] [datetime] NULL,
+	[EFFECTIVE_TS] [datetime] NULL,
+	[INSTITUTION] [varchar](100) NULL,
+	[PARTICIPANT] [varchar](100) NULL,
+	[CONTRA_INSTITUTION] [varchar](100) NULL,
+	[CONTRA_PARTICIPANT] [varchar](100) NULL,
+	[SETTLEMENT_MECHANISM_CD] [varchar](20) NULL,
+	[EVENT_TRIGGER_CD] [varchar](15) NULL,
+	[EVENT_TRIGGER_DESC] [varchar](100) NULL,
+	[LIMIT_AMOUNT] [decimal](30, 2) NULL,
+	[FIXED_TIME] [time](7) NULL,
+	[FINALIZED_BY] [varchar](10) NULL,
+	[STATUS_TYPE_CD] [varchar](15) NULL,
+	[LAST_MODIFIED_TS] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[LYNX_NET_SEND_LIMIT_ID] ASC,
+	[BATCH_ID] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];
+
+

@@ -1,0 +1,317 @@
+{
+	"name": "PL_Main_CDCC",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load Config File",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_config",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().globalParameters.gpm_cdcc_folder",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@string('files_ingestion.json')",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Set loading date",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Load Config File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_loading_date",
+					"value": {
+						"value": "@if(\n    or(equals(pipeline().parameters.pm_date, ''), equals(pipeline().parameters.pm_date, null)), \n    formatDateTime(addHours(utcNow(), -4), 'yyyy-MM-dd'), \n    pipeline().parameters.pm_date\n)\n\n\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Whether SFTP to AVScan",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set loading date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pm_sftp_to_avscan, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "SFTP to AvScan",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "1_PL_CDCC_SFTP_to_AV_Scan",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"pm_date": {
+										"value": "@variables('var_loading_date')",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Fail pipeline",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "SFTP to AvScan",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('SFTP to AvScan').error.message",
+									"type": "Expression"
+								},
+								"errorCode": "10000"
+							}
+						},
+						{
+							"name": "Set file_date",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "SFTP to AvScan",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_file_date",
+								"value": {
+									"value": "@activity('SFTP to AvScan').output.pipelineReturnValue.file_date\n\n",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Whethe Raw to UC",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Whether Land  to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pm_raw_to_UC, '1')\n",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Raw to UC",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "3_PL_CDCC_Raw_to_UC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"file_date": {
+										"value": "@variables('var_file_date')",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Fail pipeline 3",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "Raw to UC",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('Raw to UC').output.error.message\r\n",
+									"type": "Expression"
+								},
+								"errorCode": "30000"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Whether Land  to Raw",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Whether SFTP to AVScan",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pm_land_to_raw, '1')\n",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "land to Raw",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "2_PL_CDCC_LandScan_to_Raw",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"file_date": {
+										"value": "@variables('var_file_date')",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Fail pipeline 2",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "land to Raw",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('land to Raw').error.message",
+									"type": "Expression"
+								},
+								"errorCode": "20000"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"pm_date": {
+				"type": "string"
+			},
+			"pm_sftp_to_avscan": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"pm_land_to_raw": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"pm_raw_to_UC": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"var_loading_date": {
+				"type": "String"
+			},
+			"var_file_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDCC/Control"
+		},
+		"annotations": []
+	}
+}

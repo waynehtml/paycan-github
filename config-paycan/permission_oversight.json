@@ -1,0 +1,263 @@
+{
+  "catalog": [
+    {
+      "name": "_oversight_cat"
+    }
+  ],
+  "group": [
+    {
+      "name": "lake_paycandata_rusr",
+      "type": "legacy"
+    },
+    {
+      "name": "lake_paycansupport_rusr",
+      "type": "legacy"
+    },
+    {
+      "name": "lake_dataopen_rusr",
+      "type": "legacy"
+    }
+  ],
+  "permissions": [
+    {
+      "name": "standardized_db.tbl_paycan_lynx_participant_institution",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_payment",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_net_send_schedule",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_operating_schedule",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_operational_status",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_net_send_override",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_net_send_limit",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_liquidity_threshold",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_liquidity_position",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_gridlock",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_credit_position",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_credit_activity",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_loan",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_lom_status",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_minum_balance",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_pause_payments",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_paycan_lynx_transfer",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_participant_institution",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_payment",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_net_send_schedule",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_operating_schedule",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_operational_status",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_net_send_override",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_net_send_limit",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_liquidity_threshold",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_liquidity_position",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_gridlock",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_credit_position",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_credit_activity",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_loan",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_lom_status",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_minum_balance",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_pause_payments",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_transfer",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_validation",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_payment_summary",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_transfer_summary",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_lynx_credit_activity_summary",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },
+    {
+      "name": "view_db.vw_acss_usbe_sets",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    },    
+    {
+      "name": "view_db.vw_acss_usbe_vol_val",
+      "grant": [
+        "lake_paycandata_rusr"
+      ]
+    }
+  ]
+}

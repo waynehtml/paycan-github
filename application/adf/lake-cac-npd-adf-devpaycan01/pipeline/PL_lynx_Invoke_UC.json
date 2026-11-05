@@ -1,0 +1,79 @@
+{
+	"name": "PL_lynx_Invoke_UC",
+	"properties": {
+		"description": "remotely invoke PL_Lynx_UC_Main",
+		"activities": [
+			{
+				"name": "Invoke UC pipeline via API",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set remote invoke parameters",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Run_Pipeline_with_Rest_API",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"param_pipeline_name": "PL_Lynx_UC_Main",
+						"param_pipeline_param": {
+							"value": "@variables('var_pipeline_param')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set remote invoke parameters",
+				"description": "",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_pipeline_param",
+					"value": {
+						"value": "@concat('{\"prm_date\":\"', pipeline().parameters.prm_date,'\",',   '\"prm_run_raw_to_standard_uc\":\"', pipeline().parameters.prm_run_raw_to_standard_uc,'\",',\n    '\"prm_run_standard_to_curated_uc\":\"', pipeline().parameters.prm_run_standard_to_curated_uc,'\"}')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2023-01-12"
+			},
+			"prm_run_raw_to_standard_uc": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"prm_run_standard_to_curated_uc": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"var_pipeline_param": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Lynx/UC"
+		},
+		"annotations": []
+	}
+}

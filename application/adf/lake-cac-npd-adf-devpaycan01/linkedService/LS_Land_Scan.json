@@ -1,0 +1,15 @@
+{
+	"name": "LS_Land_Scan",
+	"properties": {
+		"description": "Linked services to new Landing Zone, that holds files after scanned.",
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://lakecacnpdstdevland02.dfs.core.windows.net"
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

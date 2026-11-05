@@ -1,0 +1,100 @@
+{
+	"name": "PL_CDCC_UC_init",
+	"properties": {
+		"activities": [
+			{
+				"name": "Create Standardardized Tables",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cdcc/uc_schema/tables/tb_cdcc_standardized_create_all",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Create Views",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Create Standardardized Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cdcc/uc_schema/views/tb_cdcc_views_create_all",
+					"baseParameters": {
+						"environment": "@pipeline().globalParameters.gpm_environment"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Grant",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Create Views",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cdcc/uc_schema/grants/grant_read_permission",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "CDCC/UC"
+		},
+		"annotations": []
+	}
+}

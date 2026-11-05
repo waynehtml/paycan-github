@@ -1,0 +1,37 @@
+{
+	"filenames": [{
+		"name": "credit_activity"
+	}, {
+		"name": "credit_position"
+	}, {
+		"name": "gridlock"
+	}, {
+		"name": "liquidity_position"
+	}, {
+		"name": "liquidity_threshold"
+	}, {
+		"name": "loan"
+	}, {
+		"name": "lom_status"
+	}, {
+		"name": "minum_balance"
+	}, {
+		"name": "net_send_limit"
+	}, {
+		"name": "net_send_override"
+	}, {
+		"name": "net_send_schedule"
+	}, {
+		"name": "operating_schedule"
+	}, {
+		"name": "operational_status"
+	}, {
+		"name": "participant_institution"
+	}, {
+		"name": "pause_payments"
+	}, {
+		"name": "payment"
+	}, {
+		"name": "transfer"
+	}]
+}

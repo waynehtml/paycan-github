@@ -1,0 +1,16 @@
+CREATE OR ALTER VIEW [paycan_restricted_curated].[LYNX_CREDIT_ACTIVITY_SUMMARY_VIEW]
+AS SELECT [BATCH_ID]
+      ,[CREDIT_ACTIVITY_ID]
+      ,[CYCLE_DATE]
+      ,[INSTITUTION]
+      ,[PARTICIPANT]
+      ,[TOTAL_AMOUNT]
+      ,[EARMARKED_AMOUNT]
+      ,[EARMARKED_LOM]
+      ,[REGISTERED_TIME]
+      ,[PROCESSED_TIME]
+      ,[REGISTERED]
+      ,[PROCESSED]
+      ,[TOTAL_DURATION]
+FROM [paycan_restricted_curated].[LYNX_CREDIT_ACTIVITY_SUMMARY];
+

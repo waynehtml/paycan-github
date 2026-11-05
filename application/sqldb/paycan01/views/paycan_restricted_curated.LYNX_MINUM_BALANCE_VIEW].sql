@@ -1,0 +1,13 @@
+CREATE OR ALTER VIEW [paycan_restricted_curated].[LYNX_MINUM_BALANCE_VIEW]
+AS SELECT [LYNX_MINUM_BALANCE_ID]
+      ,[BATCH_ID]
+      ,[VALIDATION_STATUS]
+      ,[CYCLE_DATE]
+      ,[INSTITUTION]
+      ,[PARTICIPANT]
+      ,[SETTLEMENT_MECHANISM_CD]
+      ,[MINIMUM_AMOUNT]
+      ,[MET_TS]
+      ,[LAST_MODIFIED_TS]
+FROM [paycan_restricted_curated].[LYNX_MINUM_BALANCE];
+

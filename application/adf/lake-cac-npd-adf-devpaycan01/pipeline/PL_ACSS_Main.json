@@ -1,0 +1,564 @@
+{
+	"name": "PL_ACSS_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run Extraction from GCS",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "var_av_direcotry_base",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_extract_from_GCS,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_ACSS_GCS_to_AV",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ACSS_GCS_to_AV",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_frequency": {
+										"value": "@pipeline().parameters.prm_frequency",
+										"type": "Expression"
+									},
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_adjust": {
+										"value": "@pipeline().parameters.prm_ajdust",
+										"type": "Expression"
+									},
+									"prm_keyvault_url": {
+										"value": "@variables('var_keyvault_url')",
+										"type": "Expression"
+									},
+									"prm_gcp_container": {
+										"value": "@variables('var_gcp_container')",
+										"type": "Expression"
+									},
+									"prm_av_directory_base": {
+										"value": "@variables('var_av_direcotry_base')",
+										"type": "Expression"
+									},
+									"run_historical": {
+										"value": "@int(pipeline().parameters.run_historical)",
+										"type": "Expression"
+									},
+									"prm_keyvault_url_historical": {
+										"value": "@if(equals(pipeline().parameters.prm_keyvault_url_historical,null), pipeline().globalParameters.gpm_keyvault_url_historical, pipeline().parameters.prm_keyvault_url_historical)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run AV to Land",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "var_land_direcotry_base",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_AV_to_land,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_ACSS_AV_to_Land",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ACSS_AV_to_Land",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_frequency": {
+										"value": "@pipeline().parameters.prm_frequency",
+										"type": "Expression"
+									},
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_av_directory_base": {
+										"value": "@variables('var_av_direcotry_base')",
+										"type": "Expression"
+									},
+									"prm_land_container": {
+										"value": "@variables('var_land_container')",
+										"type": "Expression"
+									},
+									"prm_land_directory_base": {
+										"value": "@variables('var_land_direcotry_base')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run Land to Raw",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "var_raw_direcotry",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_land_to_raw,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_ACSS_Land_to_Raw",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ACSS_Land_to_Raw",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_frequency": {
+										"value": "@pipeline().parameters.prm_frequency",
+										"type": "Expression"
+									},
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_land_container": {
+										"value": "@variables('var_land_container')",
+										"type": "Expression"
+									},
+									"prm_land_directory_base": {
+										"value": "@variables('var_land_direcotry_base')",
+										"type": "Expression"
+									},
+									"prm_restricted_container": {
+										"value": "@variables('var_restricted_container')",
+										"type": "Expression"
+									},
+									"prm_raw_directory": {
+										"value": "@variables('var_raw_direcotry')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "var_gcp_container",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "var_keyvault_url",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_gcp_container",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_gcp_container,null), pipeline().globalParameters.gpm_container_gcp_acss, pipeline().parameters.prm_gcp_container)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_keyvault_url",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_keyvault_url",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_keyvault_url, null), pipeline().globalParameters.gpm_keyvault_url, pipeline().parameters.prm_keyvault_url)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_av_direcotry_base",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "var_gcp_container",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_av_direcotry_base",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_av_directory_base,null), pipeline().globalParameters.gpm_directory_antivirus_acss_base, pipeline().parameters.prm_av_directory_base)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_land_container",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Run Extraction from GCS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_land_container",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_land_container,null), pipeline().globalParameters.gpm_container_landing, pipeline().parameters.prm_land_container)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_land_direcotry_base",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "var_land_container",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_land_direcotry_base",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_land_directory_base,null), pipeline().globalParameters.gpm_directory_landing_acss_base, pipeline().parameters.prm_land_directory_base)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_restricted_container",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Run AV to Land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_restricted_container",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_restricted_container,null), pipeline().globalParameters.gpm_container_restricted, pipeline().parameters.prm_restricted_container)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_raw_direcotry",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "var_restricted_container",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_raw_direcotry",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_raw_directory,null), pipeline().globalParameters.gpm_directory_raw_acss, pipeline().parameters.prm_raw_directory)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Run Raw to Standard",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run Land to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_raw_to_std,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Raw to Standardized",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ACSS_Raw_to_Standardized",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_restricted_container": {
+										"value": "@if(equals(pipeline().parameters.prm_restricted_container, null),pipeline().globalParameters.gpm_container_restricted,pipeline().parameters.prm_restricted_container)",
+										"type": "Expression"
+									},
+									"prm_storage": {
+										"value": "@pipeline().globalParameters.gpm_storage",
+										"type": "Expression"
+									},
+									"prm_config_storage": {
+										"value": "@pipeline().globalParameters.gpm_storage_config",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run Standardized to Curated",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run Raw to Standard",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_std_to_cur,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Standardized to Curated",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ACSS_Standardized_to_Curated",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_container": {
+										"value": "@if(equals(pipeline().parameters.prm_restricted_container, null),pipeline().globalParameters.gpm_container_restricted,pipeline().parameters.prm_restricted_container)",
+										"type": "Expression"
+									},
+									"prm_storage": {
+										"value": "@pipeline().globalParameters.gpm_storage",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_frequency": {
+				"type": "string",
+				"defaultValue": "weekly"
+			},
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2021-10"
+			},
+			"prm_ajdust": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_run_extract_from_GCS": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_AV_to_land": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_land_to_raw": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_keyvault_url": {
+				"type": "string"
+			},
+			"prm_gcp_container": {
+				"type": "string"
+			},
+			"prm_av_directory_base": {
+				"type": "string"
+			},
+			"prm_land_container": {
+				"type": "string"
+			},
+			"prm_land_directory_base": {
+				"type": "string"
+			},
+			"prm_restricted_container": {
+				"type": "string"
+			},
+			"prm_raw_directory": {
+				"type": "string"
+			},
+			"prm_run_raw_to_std": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_std_to_cur": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_sql": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"run_historical": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_keyvault_url_historical": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"var_keyvault_url": {
+				"type": "String"
+			},
+			"var_gcp_container": {
+				"type": "String"
+			},
+			"var_av_direcotry_base": {
+				"type": "String"
+			},
+			"var_land_container": {
+				"type": "String"
+			},
+			"var_land_direcotry_base": {
+				"type": "String"
+			},
+			"var_restricted_container": {
+				"type": "String"
+			},
+			"var_raw_direcotry": {
+				"type": "String"
+			},
+			"var_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": []
+	}
+}

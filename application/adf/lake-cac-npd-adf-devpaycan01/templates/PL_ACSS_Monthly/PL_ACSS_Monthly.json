@@ -1,0 +1,2985 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name"
+		},
+		"LS_Databricks": {
+			"type": "string"
+		},
+		"LS_Landing_AVscan": {
+			"type": "string"
+		},
+		"LS_Landzone": {
+			"type": "string"
+		},
+		"LS_GCS_Historical": {
+			"type": "string"
+		},
+		"LS_GCS": {
+			"type": "string"
+		},
+		"LS_Datalake": {
+			"type": "string"
+		},
+		"LS_SQL_Database": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_Monthly')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PL_ACSS_Main",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set cycle date for monthly",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_ACSS_Main",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"prm_frequency": "monthly",
+								"prm_date": {
+									"value": "@variables('var_date')",
+									"type": "Expression"
+								},
+								"prm_ajdust": {
+									"value": "@pipeline().parameters.prm_adjust",
+									"type": "Expression"
+								},
+								"prm_run_extract_from_GCS": {
+									"value": "@pipeline().parameters.prm_run_extract_from_GCS",
+									"type": "Expression"
+								},
+								"prm_run_AV_to_land": {
+									"value": "@pipeline().parameters.prm_run_AV_to_land",
+									"type": "Expression"
+								},
+								"prm_run_land_to_raw": {
+									"value": "@pipeline().parameters.prm_run_land_to_raw",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set cycle date for monthly",
+						"description": "Get last month if prm_date is not set",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Check if date is provided on adjustment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_date",
+							"value": {
+								"value": "@if(or(equals(pipeline().parameters.prm_date,null),equals(pipeline().parameters.prm_date,'yyyy-MM')),\n formatDateTime(addToTime(utcnow(), -1, 'Month'),'yyyy-MM'),\n pipeline().parameters.prm_date\n)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Check if date is provided on adjustment",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(equals(pipeline().parameters.prm_adjust,0), not(or(equals(pipeline().parameters.prm_date,''),equals(pipeline().parameters.prm_date,'yyyy-MM'))))",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "date parameter missing",
+									"type": "Fail",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"message": "date parameter is missing when processing adjustment",
+										"errorCode": "101"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Wait1",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "PL_ACSS_Main",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					}
+				],
+				"parameters": {
+					"prm_date": {
+						"type": "string",
+						"defaultValue": "yyyy-MM"
+					},
+					"prm_adjust": {
+						"type": "int",
+						"defaultValue": 0
+					},
+					"prm_run_extract_from_GCS": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"prm_run_AV_to_land": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"prm_run_land_to_raw": {
+						"type": "int",
+						"defaultValue": 1
+					}
+				},
+				"variables": {
+					"var_date": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Control"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ACSS_Main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run Extraction from GCS",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "var_av_direcotry_base",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.prm_run_extract_from_GCS,1)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "PL_ACSS_GCS_to_AV",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ACSS_GCS_to_AV",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"prm_frequency": {
+												"value": "@pipeline().parameters.prm_frequency",
+												"type": "Expression"
+											},
+											"prm_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											},
+											"prm_adjust": {
+												"value": "@pipeline().parameters.prm_ajdust",
+												"type": "Expression"
+											},
+											"prm_keyvault_url": {
+												"value": "@variables('var_keyvault_url')",
+												"type": "Expression"
+											},
+											"prm_gcp_container": {
+												"value": "@variables('var_gcp_container')",
+												"type": "Expression"
+											},
+											"prm_av_directory_base": {
+												"value": "@variables('var_av_direcotry_base')",
+												"type": "Expression"
+											},
+											"run_historical": {
+												"value": "@int(pipeline().parameters.run_historical)",
+												"type": "Expression"
+											},
+											"prm_keyvault_url_historical": {
+												"value": "@if(equals(pipeline().parameters.prm_keyvault_url_historical,null), pipeline().globalParameters.gpm_keyvault_url_historical, pipeline().parameters.prm_keyvault_url_historical)",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Run AV to Land",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "var_land_direcotry_base",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.prm_run_AV_to_land,1)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "PL_ACSS_AV_to_Land",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ACSS_AV_to_Land",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"prm_frequency": {
+												"value": "@pipeline().parameters.prm_frequency",
+												"type": "Expression"
+											},
+											"prm_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											},
+											"prm_av_directory_base": {
+												"value": "@variables('var_av_direcotry_base')",
+												"type": "Expression"
+											},
+											"prm_land_container": {
+												"value": "@variables('var_land_container')",
+												"type": "Expression"
+											},
+											"prm_land_directory_base": {
+												"value": "@variables('var_land_direcotry_base')",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Run Land to Raw",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "var_raw_direcotry",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.prm_run_land_to_raw,1)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "PL_ACSS_Land_to_Raw",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ACSS_Land_to_Raw",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"prm_frequency": {
+												"value": "@pipeline().parameters.prm_frequency",
+												"type": "Expression"
+											},
+											"prm_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											},
+											"prm_land_container": {
+												"value": "@variables('var_land_container')",
+												"type": "Expression"
+											},
+											"prm_land_directory_base": {
+												"value": "@variables('var_land_direcotry_base')",
+												"type": "Expression"
+											},
+											"prm_restricted_container": {
+												"value": "@variables('var_restricted_container')",
+												"type": "Expression"
+											},
+											"prm_raw_directory": {
+												"value": "@variables('var_raw_direcotry')",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "var_gcp_container",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "var_keyvault_url",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_gcp_container",
+							"value": {
+								"value": "@if(equals(pipeline().parameters.prm_gcp_container,null), pipeline().globalParameters.gpm_container_gcp_acss, pipeline().parameters.prm_gcp_container)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_keyvault_url",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_keyvault_url",
+							"value": {
+								"value": "@if(equals(pipeline().parameters.prm_keyvault_url, null), pipeline().globalParameters.gpm_keyvault_url, pipeline().parameters.prm_keyvault_url)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_av_direcotry_base",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "var_gcp_container",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_av_direcotry_base",
+							"value": {
+								"value": "@if(equals(pipeline().parameters.prm_av_directory_base,null), pipeline().globalParameters.gpm_directory_antivirus_acss_base, pipeline().parameters.prm_av_directory_base)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_land_container",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Run Extraction from GCS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_land_container",
+							"value": {
+								"value": "@if(equals(pipeline().parameters.prm_land_container,null), pipeline().globalParameters.gpm_container_landing, pipeline().parameters.prm_land_container)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_land_direcotry_base",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "var_land_container",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_land_direcotry_base",
+							"value": {
+								"value": "@if(equals(pipeline().parameters.prm_land_directory_base,null), pipeline().globalParameters.gpm_directory_landing_acss_base, pipeline().parameters.prm_land_directory_base)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_restricted_container",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Run AV to Land",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_restricted_container",
+							"value": {
+								"value": "@if(equals(pipeline().parameters.prm_restricted_container,null), pipeline().globalParameters.gpm_container_restricted, pipeline().parameters.prm_restricted_container)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_raw_direcotry",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "var_restricted_container",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_raw_direcotry",
+							"value": {
+								"value": "@if(equals(pipeline().parameters.prm_raw_directory,null), pipeline().globalParameters.gpm_directory_raw_acss, pipeline().parameters.prm_raw_directory)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Run Raw to Standard",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Run Land to Raw",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.prm_run_raw_to_std,1)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Raw to Standardized",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ACSS_Raw_to_Standardized",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"prm_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											},
+											"prm_restricted_container": {
+												"value": "@if(equals(pipeline().parameters.prm_restricted_container, null),pipeline().globalParameters.gpm_container_restricted,pipeline().parameters.prm_restricted_container)",
+												"type": "Expression"
+											},
+											"prm_storage": {
+												"value": "@pipeline().globalParameters.gpm_storage",
+												"type": "Expression"
+											},
+											"prm_config_storage": {
+												"value": "@pipeline().globalParameters.gpm_storage_config",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Run Standardized to Curated",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Run Raw to Standard",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.prm_run_std_to_cur,1)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Standardized to Curated",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ACSS_Standardized_to_Curated",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"prm_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											},
+											"prm_container": {
+												"value": "@if(equals(pipeline().parameters.prm_restricted_container, null),pipeline().globalParameters.gpm_container_restricted,pipeline().parameters.prm_restricted_container)",
+												"type": "Expression"
+											},
+											"prm_storage": {
+												"value": "@pipeline().globalParameters.gpm_storage",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Run SQL Ingestion",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Run Standardized to Curated",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.prm_run_sql,1)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Ingestion to SQL DB",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_ACSS_Datalake_to_SQLDB",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"prm_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"concurrency": 1,
+				"parameters": {
+					"prm_frequency": {
+						"type": "string",
+						"defaultValue": "weekly"
+					},
+					"prm_date": {
+						"type": "string",
+						"defaultValue": "2021-10"
+					},
+					"prm_ajdust": {
+						"type": "int",
+						"defaultValue": 0
+					},
+					"prm_run_extract_from_GCS": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"prm_run_AV_to_land": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"prm_run_land_to_raw": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"prm_keyvault_url": {
+						"type": "string"
+					},
+					"prm_gcp_container": {
+						"type": "string"
+					},
+					"prm_av_directory_base": {
+						"type": "string"
+					},
+					"prm_land_container": {
+						"type": "string"
+					},
+					"prm_land_directory_base": {
+						"type": "string"
+					},
+					"prm_restricted_container": {
+						"type": "string"
+					},
+					"prm_raw_directory": {
+						"type": "string"
+					},
+					"prm_run_raw_to_std": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"prm_run_std_to_cur": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"prm_run_sql": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"run_historical": {
+						"type": "int",
+						"defaultValue": 0
+					},
+					"prm_keyvault_url_historical": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"var_keyvault_url": {
+						"type": "String"
+					},
+					"var_gcp_container": {
+						"type": "String"
+					},
+					"var_av_direcotry_base": {
+						"type": "String"
+					},
+					"var_land_container": {
+						"type": "String"
+					},
+					"var_land_direcotry_base": {
+						"type": "String"
+					},
+					"var_restricted_container": {
+						"type": "String"
+					},
+					"var_raw_direcotry": {
+						"type": "String"
+					},
+					"var_date": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Dynamic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ACSS_GCS_to_AV')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ACSS_AV_to_Land')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ACSS_Land_to_Raw')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ACSS_Raw_to_Standardized')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ACSS_Standardized_to_Curated')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ACSS_Datalake_to_SQLDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_GCS_to_AV')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Download files from GCS to Anti Virus server",
+				"activities": [
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.run_historical,0)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "var_gcp_directory_Historical",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "var_gcp_access_id_Historical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_gcp_directory",
+										"value": {
+											"value": "@concat('historical/', pipeline().parameters.prm_date, '/')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "var_gcp_access_id_Historical",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "var_av_direcotry_Historical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_gcp_access_id",
+										"value": {
+											"value": "@activity('Get Access ID_Historical').output.value",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "var_av_direcotry_Historical",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Get Access ID_Historical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_av_direcotry",
+										"value": {
+											"value": "@concat(pipeline().parameters.prm_av_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Get Access ID_Historical",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": true,
+										"secureInput": true
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@pipeline().parameters.prm_keyvault_url_historical",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "IR-SelfHost01",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://vault.azure.net"
+										}
+									}
+								},
+								{
+									"name": "Download Historical Files from Google to AV",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "var_gcp_directory_Historical",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "GoogleCloudStorageReadSettings",
+												"recursive": true,
+												"deleteFilesAfterCompletion": false
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "FileServerWriteSettings",
+												"copyBehavior": "PreserveHierarchy"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Google_Binary_File_Historical",
+											"type": "DatasetReference",
+											"parameters": {
+												"access_id": {
+													"value": "@variables('var_gcp_access_id')",
+													"type": "Expression"
+												},
+												"container": {
+													"value": "@pipeline().parameters.prm_gcp_container_historical",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@variables('var_gcp_directory')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_AntiVirus_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"directory": {
+													"value": "@variables('var_av_direcotry')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "var_gcp_directory",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "var_gcp_access_id",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_gcp_directory",
+										"value": {
+											"value": "@concat(if(equals(pipeline().parameters.prm_adjust,0), '', 'adjustments/'), pipeline().parameters.prm_frequency, '/', pipeline().parameters.prm_date, '/')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "var_gcp_access_id",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Get Access ID",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_gcp_access_id",
+										"value": {
+											"value": "@activity('Get Access ID').output.value",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "var_av_direcotry",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "var_gcp_directory",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_av_direcotry",
+										"value": {
+											"value": "@concat(pipeline().parameters.prm_av_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Get Access ID",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": true,
+										"secureInput": true
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@pipeline().parameters.prm_keyvault_url",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "IR-SelfHost01",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://vault.azure.net"
+										}
+									}
+								},
+								{
+									"name": "Download Files from Google to AV",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "var_av_direcotry",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "GoogleCloudStorageReadSettings",
+												"recursive": true
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "FileServerWriteSettings",
+												"copyBehavior": "PreserveHierarchy"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Google_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"access_id": {
+													"value": "@variables('var_gcp_access_id')",
+													"type": "Expression"
+												},
+												"container": {
+													"value": "@pipeline().parameters.prm_gcp_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@variables('var_gcp_directory')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_AntiVirus_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"directory": {
+													"value": "@variables('var_av_direcotry')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"prm_frequency": {
+						"type": "string",
+						"defaultValue": "weekly"
+					},
+					"prm_date": {
+						"type": "string",
+						"defaultValue": "2021-09-27"
+					},
+					"prm_adjust": {
+						"type": "int",
+						"defaultValue": 0
+					},
+					"prm_keyvault_url": {
+						"type": "string",
+						"defaultValue": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid/?api-version=7.0"
+					},
+					"prm_gcp_container": {
+						"type": "string",
+						"defaultValue": "acs-test-general-boc-acss-bucket"
+					},
+					"prm_av_directory_base": {
+						"type": "string",
+						"defaultValue": "acss-usbe"
+					},
+					"prm_gcp_container_historical": {
+						"type": "string",
+						"defaultValue": "acs-prod-general-boc-acss-bucket"
+					},
+					"run_historical": {
+						"type": "int",
+						"defaultValue": 0
+					},
+					"prm_keyvault_url_historical": {
+						"type": "string",
+						"defaultValue": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid-historical/?api-version=7.0"
+					}
+				},
+				"variables": {
+					"var_gcp_directory": {
+						"type": "String"
+					},
+					"var_gcp_access_id": {
+						"type": "String"
+					},
+					"var_av_direcotry": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Dynamic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Google_Binary_File_Historical')]",
+				"[concat(variables('factoryId'), '/datasets/DS_AntiVirus_Binary_File')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Google_Binary_File')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_AV_to_Land')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Move Files from AV to Land",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "var_land_directory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": true,
+									"deleteFilesAfterCompletion": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_AntiVirus_Binary_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"directory": {
+										"value": "@variables('var_av_directory')",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@null",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_Land_Binary_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.prm_land_container",
+										"type": "Expression"
+									},
+									"directory": {
+										"value": "@variables('var_land_directory')",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@null",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Delete Files in AV",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Move Files from AV to Land",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_AntiVirus_Binary_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"directory": {
+										"value": "@variables('var_av_directory')",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@null",
+										"type": "Expression"
+									}
+								}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "var_av_direcotry",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_av_directory",
+							"value": {
+								"value": "@concat(pipeline().parameters.prm_av_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_land_directory",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "var_av_direcotry",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_land_directory",
+							"value": {
+								"value": "@concat(pipeline().parameters.prm_land_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"concurrency": 1,
+				"parameters": {
+					"prm_frequency": {
+						"type": "string",
+						"defaultValue": "monthly"
+					},
+					"prm_date": {
+						"type": "string",
+						"defaultValue": "2021-10"
+					},
+					"prm_av_directory_base": {
+						"type": "string",
+						"defaultValue": "acss-usbe"
+					},
+					"prm_land_container": {
+						"type": "string",
+						"defaultValue": "land-paycan"
+					},
+					"prm_land_directory_base": {
+						"type": "string",
+						"defaultValue": "acss-usbe"
+					}
+				},
+				"variables": {
+					"var_av_directory": {
+						"type": "String"
+					},
+					"var_land_directory": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Dynamic"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-04-26T20:28:13Z"
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/datasets/DS_AntiVirus_Binary_File')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Land_Binary_File')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_Land_to_Raw')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "monthly or weekly",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "var_raw_report_directory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.prm_frequency,'monthly')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Move ACSS CSV Files from Land to Raw_copy1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"deleteFilesAfterCompletion": false
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Land_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_land_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@concat(variables('var_land_directory'), '/acss-usbe/')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_Raw_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_restricted_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@variables('var_raw_data_directory')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Delete Weekly Files in Land",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "Move ACSS CSV Files from Land to Raw_copy1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_Land_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_land_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@concat('acss-usbe-weekly-', pipeline().parameters.prm_date)",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Move ACSS CSV Files from Land to Raw",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"deleteFilesAfterCompletion": false
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Land_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_land_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@concat(variables('var_land_directory'), '/Extracts/ACSS/')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_Raw_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_restricted_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@variables('var_raw_data_directory')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Move USBE CSV Files from Land to Raw",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Move ACSS CSV Files from Land to Raw",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"deleteFilesAfterCompletion": false
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Land_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_land_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@concat(variables('var_land_directory'), '/Extracts/USBE/')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_Raw_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_restricted_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@variables('var_raw_data_directory')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Move ACSS xls Files from Land to Raw",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Move USBE CSV Files from Land to Raw",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"deleteFilesAfterCompletion": false
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Land_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_land_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@concat(variables('var_land_directory'), '/Spreadsheet/ACSS/')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_Raw_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_restricted_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@variables('var_raw_report_directory')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Move USBE xls Files from Land to Raw",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Move ACSS xls Files from Land to Raw",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"deleteFilesAfterCompletion": false
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Land_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_land_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@concat(variables('var_land_directory'), '/Spreadsheet/USBE/')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_Raw_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_restricted_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@variables('var_raw_report_directory')",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Delete Monthly Files in Land",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "Move USBE xls Files from Land to Raw",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_Land_Binary_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.prm_land_container",
+													"type": "Expression"
+												},
+												"directory": {
+													"value": "@concat('acss-usbe-monthly-', pipeline().parameters.prm_date)",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@null",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "var_land_directory",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_land_directory",
+							"value": {
+								"value": "@concat(pipeline().parameters.prm_land_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_raw_data_directory",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "var_land_directory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_raw_data_directory",
+							"value": {
+								"value": "@concat(pipeline().parameters.prm_raw_directory,'/',pipeline().parameters.prm_frequency,'/',pipeline().parameters.prm_date,'/')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "var_raw_report_directory",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "var_raw_data_directory",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "var_raw_report_directory",
+							"value": {
+								"value": "@concat(pipeline().parameters.prm_raw_directory,'/',pipeline().parameters.prm_frequency,'/',pipeline().parameters.prm_date,'/report/')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"prm_frequency": {
+						"type": "string",
+						"defaultValue": "weekly"
+					},
+					"prm_date": {
+						"type": "string",
+						"defaultValue": "2021-11-08"
+					},
+					"prm_land_container": {
+						"type": "string",
+						"defaultValue": "land-paycan"
+					},
+					"prm_land_directory_base": {
+						"type": "string",
+						"defaultValue": "acss-usbe"
+					},
+					"prm_restricted_container": {
+						"type": "string",
+						"defaultValue": "restricted"
+					},
+					"prm_raw_directory": {
+						"type": "string",
+						"defaultValue": "raw/external/payments_canada/acss-usbe"
+					}
+				},
+				"variables": {
+					"var_land_directory": {
+						"type": "String"
+					},
+					"var_raw_data_directory": {
+						"type": "String"
+					},
+					"var_raw_report_directory": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Dynamic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Land_Binary_File')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Raw_Binary_File')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_Raw_to_Standardized')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Config",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup Filenames for Validation').output.firstRow.filenames)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Standardized Zone",
+									"description": "Read data, do transformations and write the new data into standardized zone. ",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": {
+											"value": "@pipeline().parameters.prm_notebook_validate_move_to_standardized",
+											"type": "Expression"
+										},
+										"baseParameters": {
+											"cycle_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											},
+											"file": {
+												"value": "@item().name",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.prm_restricted_container",
+												"type": "Expression"
+											},
+											"storage_name": {
+												"value": "@pipeline().parameters.prm_storage",
+												"type": "Expression"
+											},
+											"raw_path": {
+												"value": "@pipeline().parameters.prm_directory_raw",
+												"type": "Expression"
+											},
+											"stn_path": {
+												"value": "@pipeline().parameters.prm_directory_std",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "[parameters('LS_Databricks')]",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Filenames for Validation",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_Config_JSON_file",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.prm_config_container",
+										"type": "Expression"
+									},
+									"directory": {
+										"value": "@pipeline().parameters.prm_config_path",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@pipeline().parameters.prm_config_file_ingestion",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "ForEach_Validate_File",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Filenames for Validation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup Filenames for Validation').output.firstRow.filenames)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "validation",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": {
+											"value": "@pipeline().parameters.prm_notebook_file_validation",
+											"type": "Expression"
+										},
+										"baseParameters": {
+											"container": {
+												"value": "@pipeline().parameters.prm_restricted_container",
+												"type": "Expression"
+											},
+											"storage_name": {
+												"value": "@pipeline().parameters.prm_storage",
+												"type": "Expression"
+											},
+											"file_path": {
+												"value": "@pipeline().parameters.prm_directory_raw",
+												"type": "Expression"
+											},
+											"cycle_date": {
+												"value": "@pipeline().parameters.prm_date",
+												"type": "Expression"
+											},
+											"file": {
+												"value": "@item().name",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "[parameters('LS_Databricks')]",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Config",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "ForEach_Validate_File",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_Config_JSON_file",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.prm_config_container",
+										"type": "Expression"
+									},
+									"directory": {
+										"value": "@pipeline().parameters.prm_config_path",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@pipeline().parameters.prm_config_file_standard",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"prm_date": {
+						"type": "string",
+						"defaultValue": "2021-12-20"
+					},
+					"prm_restricted_container": {
+						"type": "string",
+						"defaultValue": "restricted"
+					},
+					"prm_directory_raw": {
+						"type": "string",
+						"defaultValue": "raw/external/payments_canada/acss-usbe/weekly"
+					},
+					"prm_config_file_standard": {
+						"type": "string",
+						"defaultValue": "acss_files_standard.json"
+					},
+					"prm_storage": {
+						"type": "string",
+						"defaultValue": "lakecacnpdstdev01"
+					},
+					"prm_config_container": {
+						"type": "string",
+						"defaultValue": "config-paycan"
+					},
+					"prm_config_path": {
+						"type": "string",
+						"defaultValue": "acss"
+					},
+					"prm_directory_std": {
+						"type": "string",
+						"defaultValue": "standardized/external/payments_canada/acss-usbe/weekly"
+					},
+					"prm_config_file_ingestion": {
+						"type": "string",
+						"defaultValue": "acss_files_ingestion.json"
+					},
+					"prm_notebook_file_validation": {
+						"type": "string",
+						"defaultValue": "/paycan/acss/file_validation"
+					},
+					"prm_notebook_validate_move_to_standardized": {
+						"type": "string",
+						"defaultValue": "/paycan/acss/raw_to_standardized"
+					},
+					"prm_config_storage": {
+						"type": "string",
+						"defaultValue": "lakecanpdstdevland01"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Dynamic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Config_JSON_file')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_Standardized_to_Curated')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Filenames",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_Config_JSON_file",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.prm_config_container",
+										"type": "Expression"
+									},
+									"directory": {
+										"value": "@pipeline().parameters.prm_config_path",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@pipeline().parameters.prm_config_file_ingestion",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Filenames",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup Filenames').output.firstRow.filenames)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Validate and move to Curated",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": {
+											"value": "@pipeline().parameters.prm_notebook_standardize_move_to_curated",
+											"type": "Expression"
+										},
+										"baseParameters": {
+											"file": {
+												"value": "@item().name",
+												"type": "Expression"
+											},
+											"container": {
+												"value": "@pipeline().parameters.prm_container",
+												"type": "Expression"
+											},
+											"storage_name": {
+												"value": "@pipeline().parameters.prm_storage",
+												"type": "Expression"
+											},
+											"stn_path": {
+												"value": "@pipeline().parameters.prm_std_directory",
+												"type": "Expression"
+											},
+											"curated_path": {
+												"value": "@pipeline().parameters.prm_cur_directory",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "[parameters('LS_Databricks')]",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"prm_container": {
+						"type": "string",
+						"defaultValue": "restricted"
+					},
+					"prm_storage": {
+						"type": "string",
+						"defaultValue": "lakecacnpdstdev01"
+					},
+					"prm_std_directory": {
+						"type": "string",
+						"defaultValue": "standardized/external/payments_canada/acss-usbe/weekly"
+					},
+					"prm_cur_directory": {
+						"type": "string",
+						"defaultValue": "curated/paycan/acss-usbe/weekly"
+					},
+					"prm_config_file_ingestion": {
+						"type": "string",
+						"defaultValue": "acss_files_ingestion.json"
+					},
+					"prm_config_container": {
+						"type": "string",
+						"defaultValue": "config-paycan"
+					},
+					"prm_config_path": {
+						"type": "string",
+						"defaultValue": "acss"
+					},
+					"prm_notebook_standardize_move_to_curated": {
+						"type": "string",
+						"defaultValue": "/paycan/acss/standardized_to_curated"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Dynamic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Config_JSON_file')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ACSS_Datalake_to_SQLDB')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Filenames",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_Config_JSON_file",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.prm_config_container",
+										"type": "Expression"
+									},
+									"directory": {
+										"value": "@pipeline().parameters.prm_config_directory",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@pipeline().parameters.prm_config_file_ingestion",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Filenames",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@array(activity('Lookup Filenames').output.firstRow.filenames)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Upload to SQL",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"wildcardFolderPath": {
+													"value": "@concat(pipeline().parameters.prm_curated_directory,'/',pipeline().parameters.prm_date_type,'/',item().name,'/')",
+													"type": "Expression"
+												},
+												"wildcardFileName": "*.parquet",
+												"enablePartitionDiscovery": false
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": {
+												"value": "@{concat('TRUNCATE TABLE [paycan_restricted_standardized].',toUpper(item().name))}",
+												"type": "Expression"
+											},
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false,
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Curated_Parquet_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"Container": {
+													"value": "@pipeline().parameters.prm_curated_container",
+													"type": "Expression"
+												},
+												"FolderPath": {
+													"value": "@pipeline().parameters.prm_curated_directory",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_SQL_Standardized_Tables",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": {
+													"value": "@toUpper(item().name)",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"prm_curated_container": {
+						"type": "string",
+						"defaultValue": "restricted"
+					},
+					"prm_curated_directory": {
+						"type": "string",
+						"defaultValue": "curated/paycan/acss-usbe"
+					},
+					"prm_config_container": {
+						"type": "string",
+						"defaultValue": "config-paycan"
+					},
+					"prm_config_directory": {
+						"type": "string",
+						"defaultValue": "acss"
+					},
+					"prm_config_file_tables_publish": {
+						"type": "string",
+						"defaultValue": "acss_files_ingestion.json"
+					},
+					"prm_date_type": {
+						"type": "string",
+						"defaultValue": "weekly"
+					},
+					"prm_config_file_ingestion": {
+						"type": "string",
+						"defaultValue": "acss_files_ingestion.json"
+					},
+					"prm_date": {
+						"type": "string",
+						"defaultValue": "2021-12-20"
+					}
+				},
+				"folder": {
+					"name": "ACSS/Dynamic"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Config_JSON_file')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Curated_Parquet_File')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_Standardized_Tables')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_AntiVirus_Binary_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_Landing_AVscan')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Land_Binary_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_Landzone')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Config_JSON_file')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_Landzone')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Google_Binary_File_Historical')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_GCS_Historical')]",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"AccessKeyId": {
+							"value": "@dataset().access_id",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"access_id": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "GoogleCloudStorageLocation",
+						"bucketName": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Google_Binary_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_GCS')]",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"AccessKeyId": {
+							"value": "@dataset().access_id",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"access_id": {
+						"type": "string"
+					},
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "GoogleCloudStorageLocation",
+						"bucketName": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Raw_Binary_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_Datalake')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directory",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Curated_Parquet_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_Datalake')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"FolderPath": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_Standardized_Tables')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_SQL_Database')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "paycan_restricted_standardized",
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[variables('factoryId')]"
+			]
+		}
+	]
+}

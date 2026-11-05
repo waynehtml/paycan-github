@@ -1,0 +1,34 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_PAYMENT]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_PAYMENT];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_PAYMENT](
+	[LYNX_PAYMENT_ID] [bigint] NOT NULL,
+	[BATCH_ID] [int] NOT NULL,
+	[VALIDATION_STATUS] [bit] NULL,
+	[PAYMENT_ID] [bigint] NULL,
+	[SYSTEM_REFERENCE] [varchar](25) NULL,
+	[CYCLE_DATE] [date] NULL,
+	[PAYER_INSTITUTION] [varchar](10) NULL,
+	[PAYER_PARTICIPANT] [varchar](10) NULL,
+	[PAYER_REFERENCE] [varchar](25) NULL,
+	[SETTLEMENT_MECHANISM_CD] [varchar](10) NULL,
+	[RECEIVER_INSTITUTION] [varchar](10) NULL,
+	[RECEIVER_PARTICIPANT] [varchar](10) NULL,
+	[SWIFT_MSG_TYPE_CD] [varchar](10) NULL,
+	[TRANSACTION_TYPE] [varchar](255) NULL,
+	[AMOUNT] [decimal](18, 2) NULL,
+	[GRIDLOCK_SETTLED_ID] [bigint] NULL,
+	[PRIORITY] [bigint] NULL,
+	[LAST_MODIFIED_TS] [datetime] NULL,
+	[STATUS_TYPE_CD] [varchar](15) NULL,
+	[STATUS_CHANGE_TIME_TS] [datetime] NULL,
+	[STATUS_REASON] [varchar](50) NULL,
+	[STATUS_MILLISECOND_DURATION] [bigint] NULL,
+	[STATUS_TYPE_CATEGORY] [varchar](256) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[LYNX_PAYMENT_ID] ASC,
+	[BATCH_ID] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];
+

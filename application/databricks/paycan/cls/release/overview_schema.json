@@ -1,0 +1,15 @@
+{
+	"fields":[
+			{"metadata":{},"name":"value_date","nullable":false,"type":"date"},
+			{"metadata":{},"name":"currency","nullable":false,"type":"string"},
+			{"metadata":{},"name":"number_of_sides_settled","nullable":false,"type":"integer"},
+			{"metadata":{},"name":"value_original_ccy","nullable":false,"type":"decimal(30,3)"},
+			{"metadata":{},"name":"number_unsettled","nullable":false,"type":"integer"},
+			{"metadata":{},"name":"value_unsettled","nullable":false,"type":"decimal(30,3)"},
+			{"metadata":{},"name":"total_pay_ins","nullable":false,"type":"decimal(30,3)"},
+			{"metadata":{},"name":"total_pay_outs","nullable":false,"type":"decimal(30,3)"},
+			{"metadata":{},"name":"audit_load_file","nullable":false,"type":"string"},	
+			{"metadata":{},"name":"audit_load_ts","nullable":false,"type":"timestamp"}				
+			],
+	"type":"struct"
+}

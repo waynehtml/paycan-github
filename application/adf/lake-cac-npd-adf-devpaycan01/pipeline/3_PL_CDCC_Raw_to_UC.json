@@ -1,0 +1,178 @@
+{
+	"name": "3_PL_CDCC_Raw_to_UC",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load Config File",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_config",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().globalParameters.gpm_cdcc_folder",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@string('files_ingestion.json')",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Check raw folder readiness",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Load Config File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_FS_Raw_Binary",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@activity('Load Config File').output.firstRow.data_container",
+							"directory": "@replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)"
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "If raw folder ready",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Check raw folder readiness",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('Check raw folder readiness').output.exists\n\n",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Raw zone - required file is not ready",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "Raw zone - required file is not ready",
+								"errorCode": "5000"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Ingest TMX CDCC File to UC",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "@activity('Load Config File').output.firstRow.notebook_raw_to_uc_cdcc_files",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"data_container": {
+										"value": "@activity('Load Config File').output.firstRow.data_container",
+										"type": "Expression"
+									},
+									"raw_path": {
+										"value": "@replace(activity('Load Config File').output.firstRow.raw_folder, '{YYYYMMDD}', pipeline().parameters.file_date)",
+										"type": "Expression"
+									},
+									"storage_name": {
+										"value": "@pipeline().globalParameters.gpm_storage",
+										"type": "Expression"
+									},
+									"environment": {
+										"value": "@pipeline().globalParameters.gpm_environment",
+										"type": "Expression"
+									},
+									"file_date": {
+										"value": "@pipeline().parameters.file_date",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Databricks_LS_UC",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"file_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "CDCC/Dynamics"
+		},
+		"annotations": []
+	}
+}

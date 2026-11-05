@@ -1,0 +1,16 @@
+﻿CREATE   VIEW [paycan_restricted_curated].[VW_LYNX_OPERATING_SCHEDULE]
+AS
+SELECT 
+	[LYNX_OPERATING_SCHEDULE_ID], 
+	[BATCH_ID], 
+	[VALIDATION_STATUS],
+	[WINDOW_LOG_ID],
+	[CYCLE_DATE],
+	[EVENT], 
+	[START_TS], 
+	[END_TS], 
+	[LAST_MODIFIED_TS], 
+	[DURATION],
+	[ingestion_date]
+FROM 
+	[paycan_restricted_curated].[LYNX_OPERATING_SCHEDULE](NOLOCK)

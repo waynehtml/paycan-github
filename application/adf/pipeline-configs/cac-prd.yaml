@@ -1,0 +1,15 @@
+variables:
+ - name: adf_prd_datafactory_name
+   value: lake-cac-prd-adf-prdpaycan01
+ - name: adf_prd_subscription_id
+   value: 7c0bb47c-1b9b-4cb9-adbc-344efbe85bbc
+ - name: adf_prd_resource_group
+   value: lake-cac-prd-rg-prdpaycan
+ - name: adf_prd_region
+   value: Canada Central
+ - name: adf_prd_service_connection
+   value: lake-dscn-prdbocad
+ - name: adf_prd_arm_parameters_file
+   value: arm_template_parameters.PRD.json
+ - name: adf_prd_trigger_config_file
+   value: trigger_config_prd.yaml

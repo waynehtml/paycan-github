@@ -1,0 +1,33 @@
+﻿CREATE   VIEW [paycan_restricted_curated].[LYNX_NET_SEND_LIMIT_RAW]
+AS SELECT 	[NET_SEND_LIMIT_ID] as net_send_limit_id
+	,[CYCLE_DATE] as cycle_date
+	,[SYSTEM_REFERENCE] as system_reference
+	,[ORIGINATOR_REFERENCE] as originator_reference
+	,[REGISTERED_TS] as registered_time
+	,[FINAL_TS] as final_time
+	,[EFFECTIVE_TS] as effective_time
+	,[INSTITUTION_NUMBER] as institution_number
+	,[INSTITUTION_IRN] as institution_irn
+	,[INSTITUTION_NAME] as institution_name
+	,[INSTITUTION] as institution_short_name
+	,[PARTICIPANT_NUMBER] as participant_number
+	,[PARTICIPANT_BIC] as participant_bic
+	,[PARTICIPANT_NAME] as participant_name
+	,[PARTICIPANT] as participant_short_name
+	,[CONTRA_INSTITUTION_NUMBER] as contra_institution_number
+	,[CONTRA_INSTITUTION_IRN] as contra_institution_irn
+	,[CONTRA_INSTITUTION_NAME] as contra_institution_name
+	,[CONTRA_INSTITUTION] as contra_institution_short_name
+	,[CONTRA_PARTICIPANT_NUMBER] as contra_participant_number
+	,[CONTRA_PARTICIPANT_BIC] as contra_participant_bic
+	,[CONTRA_PARTICIPANT_NAME] as contra_participant_name
+	,[CONTRA_PARTICIPANT] as contra_participant_short_name
+	,[SETTLEMENT_MECHANISM_CD] as settlement_mechanism
+	,[EVENT_TRIGGER_CD] as event_trigger_code
+	,[EVENT_TRIGGER_DESC] as event_trigger_description
+	,[LIMIT_AMOUNT] as limit_amount
+	,[FIXED_TIME] as fixed_time
+	,[FINALIZED_BY] as finalized_by
+	,[STATUS_TYPE_CD] as [status]
+	,[LAST_MODIFIED_TS] as last_modified
+FROM [paycan_restricted_curated].[LYNX_NET_SEND_LIMIT];

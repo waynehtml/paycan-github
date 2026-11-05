@@ -1,0 +1,63 @@
+{
+  "pipeline": "paycan-cds-supplementary-reports",
+  "tasks": [
+    {
+      "id": "download",
+      "handler": "oedis.handler.sftp.download",
+      "params": {
+        "connection": {
+          "hostname": "198.235.29.5",
+          "port": 22,
+          "host_verification": {
+            "mode": "allow_auto_add_host_key"
+          },
+          "auth": {
+            "type": "key",
+            "username": "BoCProdStats",
+            "private_key": "{{ keyvault(scope='[[secrete_scope]]', key='[[sftp_private_key]]') }}"
+          }
+        },
+        "requests": [
+          {
+            "src_dir": "CDS/AllRegulators/[[file_year]]",
+            "include": ["CDS_[[file_stamp]].zip"],
+            "recursive": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "extract",
+      "handler": "oedis.handler.archive.extract",
+      "params": {
+        "requests": [
+          {
+            "include": ["*.zip"],
+            "format": "zip",
+            "recursive": true,
+            "delete_source_file": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "upload",
+      "handler": "oedis.handler.azureblobstorage.upload",
+      "params": {
+        "connection": {
+          "uri": "[[dis_av_root]]",
+          "tenant_id": "[[tenant_id]]",
+          "client_id": "{{ keyvault(scope='[[oeds_secrete_scope]]', key='[[dis_oedisext_client_id_key]]') }}",
+          "client_secret": "{{ keyvault(scope='[[oeds_secrete_scope]]', key='[[dis_oedisext_client_secret_key]]') }}"
+        },
+        "requests": [
+          {
+            "include": ["*"],
+            "dst_dir": "[[file_date]]",
+            "recursive": true
+          }
+        ]
+      }
+    }
+  ]
+}

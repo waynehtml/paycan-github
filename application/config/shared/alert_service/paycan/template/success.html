@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{Status} - {PipelineName}</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .email-container {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 0 auto !important;
+      }
+      .info-table {
+        font-size: 14px !important;
+      }
+      .info-value {
+        font-size: 16px !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+      }
+      .header-title {
+        font-size: 22px !important;
+      }
+      .section-title {
+        font-size: 20px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#e2f0e3; font-family: Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#e2f0e3; padding:5px;">
+    <tr>
+      <td align="center">
+        <!-- Email Container -->
+        <table class="email-container" role="presentation" width="100%" style="max-width:480px; background-color:#ffffff; border:1px solid #ffffff; margin:0 auto;" cellpadding="0" cellspacing="0">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background-color:#243b1e; padding:25px 10px; border-bottom:1px solid #ffffff;">
+              <h1 class="header-title" style="font-size:26px; color:#ffffff; margin:0 0 8px 0; word-break: break-word;">{Status}: {PipelineName}</h1>
+              <p style="color:#ffffff; text-transform:uppercase; letter-spacing:1px; font-size:14px; margin:0;">Pipeline Execution Report</p>
+            </td>
+          </tr>
+
+          <!-- Execution Details -->
+          <tr>
+            <td style="padding:15px 10px;">
+              <h2 class="section-title" style="font-size:22px; color:#000000; border-bottom:2px solid #243b1e; text-align:center; padding-bottom:8px; margin:0 0 15px 0;">Execution Details</h2>
+              
+              <!-- Alert Name -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 10px;">
+                <tr>
+                  <td>
+                    <table class="info-table" width="100%" cellpadding="6" cellspacing="0" style="border:2px solid #e2f0e3; border-left:4px solid #243b1e;">
+                      <tr><td style="font-size:14px; font-weight:bold; color:#4c4e4c; text-transform:uppercase;">Alert Name</td></tr>
+                      <tr><td class="info-value" style="font-size:16px; color:#000000; word-break: break-word; overflow-wrap: break-word;">{alert_name}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Environment -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 10px;">
+                <tr>
+                  <td>
+                    <table class="info-table" width="100%" cellpadding="6" cellspacing="0" style="border:2px solid #e2f0e3; border-left:4px solid #243b1e;">
+                      <tr><td style="font-size:14px; font-weight:bold; color:#4c4e4c; text-transform:uppercase;">Environment</td></tr>
+                      <tr><td class="info-value" style="font-size:16px; color:#000000; word-break: break-word; overflow-wrap: break-word;">{env}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Pipeline -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 10px;">
+                <tr>
+                  <td>
+                    <table class="info-table" width="100%" cellpadding="6" cellspacing="0" style="border:2px solid #e2f0e3; border-left:4px solid #243b1e;">
+                      <tr><td style="font-size:14px; font-weight:bold; color:#4c4e4c; text-transform:uppercase;">Pipeline</td></tr>
+                      <tr><td class="info-value" style="font-size:16px; color:#000000; word-break: break-word; overflow-wrap: break-word;">{PipelineName}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Run ID -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 10px;">
+                <tr>
+                  <td>
+                    <table class="info-table" width="100%" cellpadding="6" cellspacing="0" style="border:2px solid #e2f0e3; border-left:4px solid #243b1e;">
+                      <tr><td style="font-size:14px; font-weight:bold; color:#4c4e4c; text-transform:uppercase;">Run ID (Click link for more details)</td></tr>
+                      <tr><td class="info-value" style="font-size:16px; color:#000000; word-break: break-all;">
+                        <a href="https://adf.azure.com/monitoring/pipelineruns/{RunId}?factory=/subscriptions/{SubId}/resourceGroups/{ResGroup}/providers/Microsoft.DataFactory/factories/{AdfName}" style="color:#1A73E8;" target="_blank">{RunId}</a>
+                      </td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Start Time -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 10px;">
+                <tr>
+                  <td>
+                    <table class="info-table" width="100%" cellpadding="6" cellspacing="0" style="border:2px solid #e2f0e3; border-left:4px solid #243b1e;">
+                      <tr><td style="font-size:14px; font-weight:bold; color:#4c4e4c; text-transform:uppercase;">Start Time (Local)</td></tr>
+                      <tr><td class="info-value" style="font-size:16px; color:#000000; word-break: break-word; overflow-wrap: break-word;">{start_local}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- End Time -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: 10px;">
+                <tr>
+                  <td>
+                    <table class="info-table" width="100%" cellpadding="6" cellspacing="0" style="border:2px solid #e2f0e3; border-left:4px solid #243b1e;">
+                      <tr><td style="font-size:14px; font-weight:bold; color:#4c4e4c; text-transform:uppercase;">End Time (Local)</td></tr>
+                      <tr><td class="info-value" style="font-size:16px; color:#000000; word-break: break-word; overflow-wrap: break-word;">{end_local}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Parameters -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <table class="info-table" width="100%" cellpadding="6" cellspacing="0" style="border:2px solid #e2f0e3; border-left:4px solid #243b1e;">
+                      <tr><td style="font-size:14px; font-weight:bold; color:#4c4e4c; text-transform:uppercase;">Parameters</td></tr>
+                      <tr><td class="info-value" style="font-size:16px; color:#000000; word-break: break-all; overflow-wrap: anywhere;">{Parameters__str}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#243b1e; padding:15px 10px; text-align:center; padding-bottom: 20px;">
+              <p style="font-size:14px; color:#ffffff; line-height:1.4; margin:0 0 8px 0; word-break: break-word; overflow-wrap: break-word;">
+                This is an automated system notification from your banking infrastructure.<br>
+                For technical support, contact the ITS Operational Environment Data Services team.
+              </p>
+              <p style="font-size:15px; color:#ffffff; margin-top:15px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #e2f0e3; padding-top:12px; word-break: break-word; overflow-wrap: break-word;">
+                CONFIDENTIAL: This message contains sensitive banking system information.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,126 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "value": "lake-cac-prd-adf-prdpaycan01"
+        },
+        "LS_SQL_Database_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=lake-cac-prd-sql-prd01.database.windows.net;Initial Catalog=lake-cac-prd-sqldb-prdpaycan01"
+        },
+        "LS_Databricks_properties_typeProperties_domain": {
+            "value": "https://adb-5449709662536437.17.azuredatabricks.net"
+        },
+        "LS_Databricks_properties_typeProperties_workspaceResourceId": {
+            "value": "/subscriptions/7c0bb47c-1b9b-4cb9-adbc-344efbe85bbc/resourceGroups/lake-cac-prd-rg-prdplatform/providers/Microsoft.Databricks/workspaces/lake-cac-prd-dbw-prd01"
+        },
+        "LS_Databricks_properties_typeProperties_existingClusterId": {
+            "value": "0819-145355-row205"
+        },
+        "LS_Databricks_properties_connectVia_referenceName": {
+            "value": "IR-SelfHost01"
+        },
+        "LS_Databricks_properties_connectVia_type": {
+            "value": "IntegrationRuntimeReference"
+        },
+        "LS_Datalake_properties_typeProperties_url": {
+            "value": "https://lakecacprdstprd01.dfs.core.windows.net"
+        },
+        "LS_Google_Cloud_Storage_properties_typeProperties_accessKeyId": {
+            "value": "@{linkedService().AccessKeyId}"
+        },
+        "LS_Google_Cloud_Storage_properties_parameters_AccessKeyId": {
+            "value": {}
+        },
+        "LS_Keyvault_properties_typeProperties_baseUrl": {
+            "value": "https://lake-cac-prd-kv-prdpay01.vault.azure.net/"
+        },
+        "LS_Landing_AVscan_properties_typeProperties_host": {
+            "value": "\\\\INP9WLAKEAV01\\incoming\\paycan"
+        },
+        "LS_Landing_AVscan_properties_typeProperties_userId": {
+            "value": "bocad\\lake_avscan_inpw_s"
+        },
+        "LS_Landzone_properties_typeProperties_url": {
+            "value": "https://lakecacprdstprdland01.dfs.core.windows.net"
+        },
+        "Recurring Daily_properties_PL_Control_Dataflow_parameters_prm_skip_extraction_1_0": {
+            "value": 0
+        },
+        "Recurring Daily_properties_PL_Control_Dataflow_parameters_prm_date": {
+            "value": "yyyy-MM-dd"
+        },
+        "IR-SelfHost01_properties_typeProperties_linkedInfo_resourceId": {
+            "value": "/subscriptions/7c0bb47c-1b9b-4cb9-adbc-344efbe85bbc/resourcegroups/lake-cac-prd-rg-prdplatform/providers/Microsoft.DataFactory/factories/lake-cac-prd-adf-prdplatform01/integrationruntimes/IR-SelfHost01"
+        },
+        "dataFactory_properties_globalParameters_gpm_container_restricted_value": {
+            "value": "restricted"
+        },
+        "dataFactory_properties_globalParameters_gpm_container_config_value": {
+            "value": "config-paycan"
+        },
+        "dataFactory_properties_globalParameters_gpm_container_gcp_value": {
+            "value": "acs-prod-general-boc-lynx-bucket"
+        },
+        "dataFactory_properties_globalParameters_gpm_container_landing_value": {
+            "value": "land-paycan"
+        },
+        "dataFactory_properties_globalParameters_gpm_storage_value": {
+            "value": "lakecacprdstprd01"
+        },
+        "dataFactory_properties_globalParameters_gpm_storage_config_value": {
+            "value": "lakecacprdstprdland01"
+        },
+        "dataFactory_properties_globalParameters_gpm_directory_config_value": {
+            "value": "lynx"
+        },
+        "dataFactory_properties_globalParameters_gpm_directory_gcp_value": {
+            "value": "daily"
+        },
+        "dataFactory_properties_globalParameters_gpm_directory_landing_value": {
+            "value": "lynx"
+        },
+        "dataFactory_properties_globalParameters_gpm_directory_raw_value": {
+            "value": "raw/external/payments_canada/lynx"
+        },
+        "dataFactory_properties_globalParameters_gpm_directory_standard_value": {
+            "value": "standardized/external/payments_canada/lynx"
+        },
+        "dataFactory_properties_globalParameters_gpm_directory_curated_value": {
+            "value": "curated/paycan/lynx"
+        },
+        "dataFactory_properties_globalParameters_gpm_config_file_ingestion_value": {
+            "value": "files_ingestion.json"
+        },
+        "dataFactory_properties_globalParameters_gpm_config_file_standard_value": {
+            "value": "files_standard.json"
+        },
+        "dataFactory_properties_globalParameters_gpm_config_file_holidays_value": {
+            "value": "holidays.json"
+        },
+        "dataFactory_properties_globalParameters_gpm_config_file_tables_publish_value": {
+            "value": "tables_publish.json"
+        },
+        "dataFactory_properties_globalParameters_gpm_keyvault_url_value": {
+            "value": "https://lake-cac-prd-kv-prdpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid/?api-version=7.0"
+        },
+        "dataFactory_properties_globalParameters_gpm_directory_antivirus_value": {
+            "value": "lynx"
+        },
+		"dataFactory_properties_globalParameters_gpm_container_gcp_acss_value": {
+            "value": "acs-prod-general-boc-acss-bucket"
+        },
+		"dataFactory_properties_globalParameters_gpm_directory_antivirus_acss_base_value": {
+            "value": "acss-usbe"
+        },
+		"dataFactory_properties_globalParameters_gpm_directory_landing_acss_base_value": {
+            "value": "acss-usbe"
+        },
+		"dataFactory_properties_globalParameters_gpm_directory_raw_acss_value": {
+            "value": "raw/external/payments_canada/acss-usbe"
+        },
+        "dataFactory_location": {
+            "value": "canadacentral"
+        }
+    }
+}

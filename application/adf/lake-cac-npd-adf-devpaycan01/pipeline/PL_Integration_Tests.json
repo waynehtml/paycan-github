@@ -1,0 +1,247 @@
+{
+	"name": "PL_Integration_Tests",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run Integration Test",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Validate and move to Curated",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/lynx/tests/invoke_tests",
+					"baseParameters": {
+						"config": {
+							"value": "@string(activity('Lookup Config').output.firstRow)",
+							"type": "Expression"
+						},
+						"storage": {
+							"value": "@variables('var_storage_name')",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@variables('var_raw_container')",
+							"type": "Expression"
+						},
+						"file_date": {
+							"value": "@variables('var_date')",
+							"type": "Expression"
+						},
+						"file_name": {
+							"value": "@variables('var_filename')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Lookup Config",
+				"description": "Update 2024 Holiday file",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": false,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@variables('var_raw_container')",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@variables('var_config_directory')",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@variables('var_config')",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Validate and Move to Standardized",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Lookup Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/lynx/20_standardized/1_std_main",
+					"baseParameters": {
+						"cycle_date": {
+							"value": "@variables('var_date')",
+							"type": "Expression"
+						},
+						"file": {
+							"value": "@concat(variables('var_filename'),'_',variables('var_date'),'.csv')",
+							"type": "Expression"
+						},
+						"config": {
+							"value": "@string(activity('Lookup Config').output.firstRow)",
+							"type": "Expression"
+						},
+						"container_name": {
+							"value": "@variables('var_raw_container')",
+							"type": "Expression"
+						},
+						"storage_name": {
+							"value": "@variables('var_storage_name')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Validate and move to Curated",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Validate and Move to Standardized",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/lynx/30_curated/1_curate_main",
+					"baseParameters": {
+						"cycle_date": {
+							"value": "@variables('var_date')",
+							"type": "Expression"
+						},
+						"file": {
+							"value": "@variables('var_filename')",
+							"type": "Expression"
+						},
+						"storage": {
+							"value": "@variables('var_storage_name')",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@variables('var_raw_container')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_raw_container": {
+				"type": "string"
+			},
+			"prm_raw_directory": {
+				"type": "string"
+			},
+			"prm_config": {
+				"type": "string"
+			},
+			"prm_storage_name": {
+				"type": "string"
+			},
+			"prm_date": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"var_config": {
+				"type": "String",
+				"defaultValue": "std_validation_config.json"
+			},
+			"var_storage_name": {
+				"type": "String",
+				"defaultValue": "lakecacnpdstdevland01"
+			},
+			"var_date": {
+				"type": "String",
+				"defaultValue": "2021-05-11"
+			},
+			"var_filename": {
+				"type": "String",
+				"defaultValue": "payment"
+			},
+			"var_raw_container": {
+				"type": "String",
+				"defaultValue": "config-paycan"
+			},
+			"var_raw_directory": {
+				"type": "String",
+				"defaultValue": "raw/external/payments_canada/lynx"
+			},
+			"var_config_directory": {
+				"type": "String",
+				"defaultValue": "config"
+			}
+		},
+		"folder": {
+			"name": "Lynx/Tests"
+		},
+		"annotations": []
+	}
+}

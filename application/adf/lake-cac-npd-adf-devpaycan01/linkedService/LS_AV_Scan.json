@@ -1,0 +1,15 @@
+{
+	"name": "LS_AV_Scan",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"serviceEndpoint": "https://lakecacnpdstdevav01.blob.core.windows.net",
+			"accountKind": "Storage"
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

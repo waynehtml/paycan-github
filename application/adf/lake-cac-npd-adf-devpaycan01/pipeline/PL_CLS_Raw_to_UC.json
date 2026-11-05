@@ -1,0 +1,85 @@
+{
+	"name": "PL_CLS_Raw_to_UC",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_CLS_Raw_to_UC",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cls/release/overview_load_raw_to_uc",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().parameters.prm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Exit failure if Notebook encountered error",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "PL_CLS_Raw_to_UC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('PL_CLS_Raw_to_UC').output.runOutput,'encountered error')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_CLS_force_fail_00",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CLS_force_fail",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_environment": {
+				"type": "string",
+				"defaultValue": "dev"
+			}
+		},
+		"variables": {
+			"test": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CLS/Dynamic"
+		},
+		"annotations": []
+	}
+}

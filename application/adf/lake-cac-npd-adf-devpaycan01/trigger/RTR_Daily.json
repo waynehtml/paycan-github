@@ -1,0 +1,39 @@
+{
+	"name": "RTR_Daily",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_RTR_Control_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"prm_run_gcs_to_land": 1,
+					"prm_run_land_to_raw": 1,
+					"prm_run_raw_to_standard": 1,
+					"prm_uc_load_type": "daily",
+					"prm_run_file_validation": 1
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2026-10-04T16:32:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						7
+					]
+				}
+			}
+		}
+	}
+}

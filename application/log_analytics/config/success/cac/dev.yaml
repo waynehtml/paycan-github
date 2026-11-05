@@ -1,0 +1,29 @@
+variables:
+ - name: cac_dev_resourceGroupName
+   value: lake-cac-npd-rg-devpaycan
+ - name: cac_dev_workspaceName
+   value: lake-cac-npd-log-dev01
+ - name: cac_dev_workspaceResourceGroup
+   value: lake-cac-npd-rg-devplatform
+ - name: cac_dev_location
+   value: canadacentral
+ - name: cac_dev_queryName
+   value: 'DEV - PayCan - Pipeline Success'
+ - name: cac_dev_description
+   value: 'The PayCan Pipeline has completed successfully. A summary of the pipeline run completion is below:'
+ - name: cac_dev_displayName
+   value: 'DEV - PayCan - Pipeline Success'
+ - name: cac_dev_actionGroupName
+   value: 'paycan test'
+ - name: cac_dev_actionResourceGroup
+   value: lake-cac-npd-rg-devplatform
+ - name: cac_dev_operator
+   value: GreaterThanOrEqual
+ - name: cac_dev_query
+   value: 'ADFPipelineRun | sort by TimeGenerated | where PipelineName == "PL_Control_Main" and Status == "Succeeded" | project PipelineName, Status, Parameters, Start, End | limit 1'
+ - name: cac_dev_threshold
+   value: 1
+ - name: cac_dev_timeAggregation
+   value: Count
+ - name: cac_dev_severity
+   value: 3

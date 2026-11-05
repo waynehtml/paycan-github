@@ -1,0 +1,12 @@
+variables:
+  - name: dbx_prd_workspace_url
+    value: https://adb-5449709662536437.17.azuredatabricks.net/
+  - name: dbx_prd_project_path
+    value: databricks_notebooks
+  - name: dbx_prd_destination_path
+    value: /paycan
+  - name: dbx_prd_repo_notebook_location
+    value: application/databricks/paycan
+  - name: dbx_prd_service_connection
+    value: lake-dscn-prdbocad
+

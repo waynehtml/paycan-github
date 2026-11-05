@@ -1,0 +1,45 @@
+{
+	"name": "DS_Google_Binary_File_RTR",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_GCS_RTR",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"AccessKeyId": "@dataset().access_id"
+			}
+		},
+		"parameters": {
+			"access_id": {
+				"type": "string"
+			},
+			"container": {
+				"type": "string"
+			},
+			"directory": {
+				"type": "string"
+			},
+			"filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "GoogleCloudStorageLocation",
+				"bucketName": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().directory",
+					"type": "Expression"
+				},
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

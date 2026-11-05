@@ -1,0 +1,14 @@
+{
+	"name": "LS_Landzone",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://lakecacnpdstdevland01.dfs.core.windows.net"
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"name": "TR_CDCC_Weekly",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Main_CDCC",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"pm_sftp_to_avscan": "1",
+					"pm_land_to_raw": "1",
+					"pm_raw_to_UC": "1"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2025-06-23T14:39:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						21
+					],
+					"weekDays": [
+						"Tuesday"
+					]
+				}
+			}
+		}
+	}
+}

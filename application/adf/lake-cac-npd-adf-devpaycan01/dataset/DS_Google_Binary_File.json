@@ -1,0 +1,48 @@
+{
+	"name": "DS_Google_Binary_File",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_GCS",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"AccessKeyId": {
+					"value": "@dataset().access_id",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"access_id": {
+				"type": "string"
+			},
+			"container": {
+				"type": "string"
+			},
+			"directory": {
+				"type": "string"
+			},
+			"filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "GoogleCloudStorageLocation",
+				"bucketName": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().directory",
+					"type": "Expression"
+				},
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

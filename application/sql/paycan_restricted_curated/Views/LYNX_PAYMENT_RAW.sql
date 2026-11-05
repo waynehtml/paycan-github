@@ -1,0 +1,34 @@
+﻿CREATE   VIEW [paycan_restricted_curated].[LYNX_PAYMENT_RAW]
+AS SELECT 	[PAYMENT_ID] as payment_id
+	,[SYSTEM_REFERENCE] as system_reference
+	,[CYCLE_DATE] as cycle_date
+	,[PAYER_INSTITUTION_NUMBER] as payer_institution_number
+	,[PAYER_INSTITUTION_IRN] as payer_institution_irn
+	,[PAYER_INSTITUTION_NAME] as payer_institution_name
+	,[PAYER_INSTITUTION] as payer_institution_short_name
+	,[PAYER_PARTICIPANT_NUMBER] as payer_participant_number
+	,[PAYER_PARTICIPANT_BIC] as payer_participant_bic
+	,[PAYER_PARTICIPANT_NAME] as payer_participant_name
+	,[PAYER_PARTICIPANT] as payer_participant_short_name
+	,[PAYER_REFERENCE] as payer_reference
+	,[SETTLEMENT_MECHANISM_CD] as settlement_mechanism
+	,[RECEIVER_INSTITUTION_NUMBER] as receiver_institution_number
+	,[RECEIVER_INSTITUTION_IRN] as receiver_institution_irn
+	,[RECEIVER_INSTITUTION_NAME] as receiver_institution_name
+	,[RECEIVER_INSTITUTION] as receiver_institution_short_name
+	,[RECEIVER_PARTICIPANT_NUMBER] as receiver_participant_number
+	,[RECEIVER_PARTICIPANT_BIC] as receiver_participant_bic
+	,[RECEIVER_PARTICIPANT_NAME] as receiver_participant_name
+	,[RECEIVER_PARTICIPANT] as receiver_participant_short_name
+	,[SWIFT_MSG_TYPE_CD] as swift_msg_type
+	,[TRANSACTION_TYPE] as transaction_type
+	,[PCRN] as pcrn
+	,[AMOUNT] as amount
+	,[GRIDLOCK_SETTLED_ID] as gridlock_settled_id
+	,[PRIORITY] as [priority]
+	,[LAST_MODIFIED_TS] as last_modified
+	,[STATUS_TYPE_CD] as status_type
+	,[STATUS_CHANGE_TIME_TS] as status_change_time
+	,[STATUS_REASON] as status_reason
+	,[STATUS_MILLISECOND_DURATION] as status_millisecond_duration
+FROM [paycan_restricted_curated].[LYNX_PAYMENT];

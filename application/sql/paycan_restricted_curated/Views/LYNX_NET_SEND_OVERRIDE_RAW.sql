@@ -1,0 +1,30 @@
+﻿CREATE   VIEW [paycan_restricted_curated].[LYNX_NET_SEND_OVERRIDE_RAW]
+AS SELECT 	[NET_SEND_OVERRIDE_ID] as net_send_override_id
+	,[CYCLE_DATE] as cycle_date
+	,[ACTIVE_DATE] as active_date
+	,[DELETE_DATE] as delete_date
+	,[CHANGE_TIME] as change_time
+	,[INSTITUTION_NUMBER] as institution_number
+	,[INSTITUTION_IRN] as institution_irn
+	,[INSTITUTION_NAME] as institution_name
+	,[INSTITUTION] as institution_short_name
+	,[PARTICIPANT_NUMBER] as participant_number
+	,[PARTICIPANT_BIC] as participant_bic
+	,[PARTICIPANT_NAME] as participant_name
+	,[PARTICIPANT] as participant_short_name
+	,[CONTRA_INSTITUTION_NUMBER] as contra_institution_number
+	,[CONTRA_INSTITUTION_IRN] as contra_institution_irn
+	,[CONTRA_INSTITUTION_NAME] as contra_institution_name
+	,[CONTRA_INSTITUTION] as contra_institution_short_name
+	,[CONTRA_PARTICIPANT_NUMBER] as contra_participant_number
+	,[CONTRA_PARTICIPANT_BIC] as contra_participant_bic
+	,[CONTRA_PARTICIPANT_NAME] as contra_participant_name
+	,[CONTRA_PARTICIPANT] as contra_participant_short_name
+	,[SETTLEMENT_MECHANISM_CD] as settlement_mechanism
+	,[DAY_NUMBER] as day_number
+	,[FIXED_TIME] as fixed_time
+	,[EVENT_TRIGGER_CD] as event_trigger_code
+	,[EVENT_TRIGGER_DESCRIPTION] as event_trigger_description
+	,[AMOUNT] as amount
+	,[LAST_MODIFIED_TS] as last_modified
+FROM [paycan_restricted_curated].[LYNX_NET_SEND_OVERRIDE];

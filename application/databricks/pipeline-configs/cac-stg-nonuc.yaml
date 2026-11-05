@@ -1,0 +1,17 @@
+variables:
+  - name: dbx_stg_workspace_url
+    value: https://adb-5529770563163049.9.azuredatabricks.net
+  - name: dbx_stg_project_path
+    value: databricks_notebooks
+  - name: dbx_stg_destination_path
+    value: /paycan
+  - name: dbx_stg_cluster_id
+    value: 0812-142035-hemp696
+  - name: dbx_stg_test_path
+    value: /paycan
+  - name: dbx_stg_repo_notebook_location
+    value: application/databricks/paycan
+  - name: dbx_stg_service_connection
+    value: lake-dscn-stgbocad
+
+

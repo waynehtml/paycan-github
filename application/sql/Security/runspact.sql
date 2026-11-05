@@ -1,0 +1,2 @@
+﻿CREATE USER [runspact] WITHOUT LOGIN;
+

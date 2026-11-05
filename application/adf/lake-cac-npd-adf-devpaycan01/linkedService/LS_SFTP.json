@@ -1,0 +1,48 @@
+{
+	"name": "LS_SFTP",
+	"properties": {
+		"description": "Linked service created to copy TMX-CDCC data from SFTP Server ",
+		"parameters": {
+			"host": {
+				"type": "string",
+				"defaultValue": "198.235.29.5"
+			},
+			"user_name": {
+				"type": "string",
+				"defaultValue": "BoCProdStats"
+			},
+			"secret_key_vault": {
+				"type": "string",
+				"defaultValue": "tmx-cdcc-sftp-rsa-key"
+			},
+			"port": {
+				"type": "int",
+				"defaultValue": 22
+			}
+		},
+		"annotations": [],
+		"type": "Sftp",
+		"typeProperties": {
+			"host": "@{linkedService().host}",
+			"port": 22,
+			"skipHostKeyValidation": true,
+			"authenticationType": "SshPublicKey",
+			"userName": "@{linkedService().user_name}",
+			"privateKeyContent": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_Keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": {
+					"value": "@linkedService().secret_key_vault",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

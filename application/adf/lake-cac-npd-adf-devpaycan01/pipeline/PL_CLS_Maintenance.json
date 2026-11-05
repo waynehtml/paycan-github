@@ -1,0 +1,37 @@
+{
+	"name": "PL_CLS_Maintenance",
+	"properties": {
+		"activities": [
+			{
+				"name": "Maintenance",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/common/maintenance",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "CLS/Dynamic"
+		},
+		"annotations": []
+	}
+}

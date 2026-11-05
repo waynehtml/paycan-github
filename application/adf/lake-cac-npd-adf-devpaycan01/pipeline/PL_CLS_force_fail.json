@@ -1,0 +1,33 @@
+{
+	"name": "PL_CLS_force_fail",
+	"properties": {
+		"activities": [
+			{
+				"name": "Force to fail",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fail",
+					"value": {
+						"value": "@div(1,0)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"fail": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "CLS/Dynamic"
+		},
+		"annotations": []
+	}
+}

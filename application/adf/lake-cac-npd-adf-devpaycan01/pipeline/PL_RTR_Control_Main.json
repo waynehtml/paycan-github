@@ -1,0 +1,247 @@
+{
+	"name": "PL_RTR_Control_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Extract from CS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Extract from Exchange",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_RTR_Control_Dataflow",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_date": {
+							"value": "@variables('var_date')",
+							"type": "Expression"
+						},
+						"prm_container_restricted": {
+							"value": "@pipeline().globalParameters.gpm_container_restricted",
+							"type": "Expression"
+						},
+						"prm_container_config": {
+							"value": "@pipeline().globalParameters.gpm_container_config",
+							"type": "Expression"
+						},
+						"prm_container_gcp": {
+							"value": "@pipeline().globalParameters.gpm_container_gcp_rtr_prod",
+							"type": "Expression"
+						},
+						"prm_container_landing": {
+							"value": "@pipeline().globalParameters.gpm_container_landing",
+							"type": "Expression"
+						},
+						"prm_directory_config": {
+							"value": "@pipeline().globalParameters.gpm_directory_config_rtr",
+							"type": "Expression"
+						},
+						"prm_directory_gcp": {
+							"value": "@pipeline().globalParameters.gpm_directory_gcp_rtr_cs",
+							"type": "Expression"
+						},
+						"prm_directory_landing": {
+							"value": "@pipeline().globalParameters.gpm_directory_landing_rtr_cs",
+							"type": "Expression"
+						},
+						"prm_directory_raw": {
+							"value": "@pipeline().globalParameters.gpm_directory_raw_rtr_cs",
+							"type": "Expression"
+						},
+						"prm_config_file_ingestion": {
+							"value": "@pipeline().globalParameters.gpm_config_file_ingestion_rtr_cs",
+							"type": "Expression"
+						},
+						"prm_keyvault_url": {
+							"value": "@pipeline().globalParameters.gpm_keyvault_url_rtr_prod",
+							"type": "Expression"
+						},
+						"prm_directory_antivirus": {
+							"value": "@pipeline().globalParameters.gpm_directory_antivirus_rtr_cs",
+							"type": "Expression"
+						},
+						"prm_run_raw_to_standard": {
+							"value": "@pipeline().parameters.prm_run_raw_to_standard",
+							"type": "Expression"
+						},
+						"prm_run_gcs_to_land": {
+							"value": "@pipeline().parameters.prm_run_gcs_to_land",
+							"type": "Expression"
+						},
+						"prm_run_land_to_raw": {
+							"value": "@pipeline().parameters.prm_run_land_to_raw",
+							"type": "Expression"
+						},
+						"prm_uc_dataset": "cs",
+						"prm_uc_load_type": {
+							"value": "@pipeline().parameters.prm_uc_load_type",
+							"type": "Expression"
+						},
+						"prm_run_file_validation": {
+							"value": "@pipeline().parameters.prm_run_file_validation",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Extract from Exchange",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_RTR_Control_Dataflow",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_date": {
+							"value": "@variables('var_date')",
+							"type": "Expression"
+						},
+						"prm_container_restricted": {
+							"value": "@pipeline().globalParameters.gpm_container_restricted",
+							"type": "Expression"
+						},
+						"prm_container_config": {
+							"value": "@pipeline().globalParameters.gpm_container_config",
+							"type": "Expression"
+						},
+						"prm_container_gcp": {
+							"value": "@pipeline().globalParameters.gpm_container_gcp_rtr_prod",
+							"type": "Expression"
+						},
+						"prm_container_landing": {
+							"value": "@pipeline().globalParameters.gpm_container_landing",
+							"type": "Expression"
+						},
+						"prm_directory_config": {
+							"value": "@pipeline().globalParameters.gpm_directory_config_rtr",
+							"type": "Expression"
+						},
+						"prm_directory_gcp": {
+							"value": "@pipeline().globalParameters.gpm_directory_gcp_rtr_ex",
+							"type": "Expression"
+						},
+						"prm_directory_landing": {
+							"value": "@pipeline().globalParameters.gpm_directory_landing_rtr_ex",
+							"type": "Expression"
+						},
+						"prm_directory_raw": {
+							"value": "@pipeline().globalParameters.gpm_directory_raw_rtr_ex",
+							"type": "Expression"
+						},
+						"prm_config_file_ingestion": {
+							"value": "@pipeline().globalParameters.gpm_config_file_ingestion_rtr_ex",
+							"type": "Expression"
+						},
+						"prm_keyvault_url": {
+							"value": "@pipeline().globalParameters.gpm_keyvault_url_rtr_prod",
+							"type": "Expression"
+						},
+						"prm_directory_antivirus": {
+							"value": "@pipeline().globalParameters.gpm_directory_antivirus_rtr_ex",
+							"type": "Expression"
+						},
+						"prm_run_raw_to_standard": {
+							"value": "@pipeline().parameters.prm_run_raw_to_standard",
+							"type": "Expression"
+						},
+						"prm_run_gcs_to_land": {
+							"value": "@pipeline().parameters.prm_run_gcs_to_land",
+							"type": "Expression"
+						},
+						"prm_run_land_to_raw": {
+							"value": "@pipeline().parameters.prm_run_land_to_raw",
+							"type": "Expression"
+						},
+						"prm_uc_dataset": "exchange",
+						"prm_uc_load_type": {
+							"value": "@pipeline().parameters.prm_uc_load_type",
+							"type": "Expression"
+						},
+						"prm_run_file_validation": {
+							"value": "@pipeline().parameters.prm_run_file_validation",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set Date",
+				"description": "if not set, date is set to yesterdays date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_date",
+					"value": {
+						"value": "@if(\n  or(\n    equals(pipeline().parameters.prm_date, null),\n    equals(pipeline().parameters.prm_date, 'yyyy-MM-dd')\n  ),\n  formatDateTime(addDays(utcnow(), -1), 'yyyy-MM-dd'),\n  formatDateTime(pipeline().parameters.prm_date, 'yyyy-MM-dd')\n)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			},
+			"prm_run_gcs_to_land": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_land_to_raw": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_raw_to_standard": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_uc_load_type": {
+				"type": "string",
+				"defaultValue": "daily"
+			},
+			"prm_run_file_validation": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"var_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "RTR/Control"
+		},
+		"annotations": []
+	}
+}

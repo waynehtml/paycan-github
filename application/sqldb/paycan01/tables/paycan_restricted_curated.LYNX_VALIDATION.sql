@@ -1,0 +1,18 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_VALIDATION]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_VALIDATION];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_VALIDATION](
+	[BATCH_ID] [int] NOT NULL,
+	[FILE_NAME] [varchar](255) NOT NULL,
+	[FILE_PRIMARY_ID] [bigint] NOT NULL,
+	[BUSINESS_ID] [bigint] NULL,
+	[FLAG_NAME] [varchar](255) NOT NULL,
+	[CREATETIME] [date] NULL,
+PRIMARY KEY CLUSTERED
+(
+	[BATCH_ID] ASC,
+	[FILE_NAME] ASC,
+	[FILE_PRIMARY_ID] ASC,
+	[FLAG_NAME] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];

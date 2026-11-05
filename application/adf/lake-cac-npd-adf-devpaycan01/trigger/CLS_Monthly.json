@@ -1,0 +1,36 @@
+{
+	"name": "CLS_Monthly",
+	"properties": {
+		"description": "ingests all CLS data on the 20th of every month",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_CLS_Load_All",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2025-01-14T18:14:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						1
+					],
+					"monthDays": [
+						20
+					]
+				}
+			}
+		}
+	}
+}

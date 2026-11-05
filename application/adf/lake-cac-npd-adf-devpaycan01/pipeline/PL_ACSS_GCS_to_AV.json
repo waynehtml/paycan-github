@@ -1,0 +1,438 @@
+{
+	"name": "PL_ACSS_GCS_to_AV",
+	"properties": {
+		"description": "Download files from GCS to Anti Virus server",
+		"activities": [
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.run_historical,0)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "var_gcp_directory_Historical",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "var_gcp_access_id_Historical",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_gcp_directory",
+								"value": {
+									"value": "@concat('historical/', pipeline().parameters.prm_date, '/')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "var_gcp_access_id_Historical",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "var_av_direcotry_Historical",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_gcp_access_id",
+								"value": {
+									"value": "@activity('Get Access ID_Historical').output.value",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "var_av_direcotry_Historical",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Get Access ID_Historical",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_av_direcotry",
+								"value": {
+									"value": "@concat(pipeline().parameters.prm_av_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Get Access ID_Historical",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": true,
+								"secureInput": true
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().parameters.prm_keyvault_url_historical",
+									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "IR-SelfHost01",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET",
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://vault.azure.net"
+								}
+							}
+						},
+						{
+							"name": "Download Historical Files from Google to AV",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "var_gcp_directory_Historical",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "GoogleCloudStorageReadSettings",
+										"recursive": true,
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "FileServerWriteSettings",
+										"copyBehavior": "PreserveHierarchy"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Google_Binary_File_Historical",
+									"type": "DatasetReference",
+									"parameters": {
+										"access_id": {
+											"value": "@variables('var_gcp_access_id')",
+											"type": "Expression"
+										},
+										"container": {
+											"value": "@pipeline().parameters.prm_gcp_container_historical",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('var_gcp_directory')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_AntiVirus_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"directory": {
+											"value": "@variables('var_av_direcotry')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "var_gcp_directory",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "var_gcp_access_id",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_gcp_directory",
+								"value": {
+									"value": "@concat(if(equals(pipeline().parameters.prm_adjust,0), '', 'adjustments/'), pipeline().parameters.prm_frequency, '/', pipeline().parameters.prm_date, '/')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "var_gcp_access_id",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Get Access ID",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_gcp_access_id",
+								"value": {
+									"value": "@activity('Get Access ID').output.value",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "var_av_direcotry",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "var_gcp_directory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_av_direcotry",
+								"value": {
+									"value": "@concat(pipeline().parameters.prm_av_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Get Access ID",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": true,
+								"secureInput": true
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().parameters.prm_keyvault_url",
+									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "IR-SelfHost01",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "GET",
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://vault.azure.net"
+								}
+							}
+						},
+						{
+							"name": "Download Files from Google to AV",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "var_av_direcotry",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "GoogleCloudStorageReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "FileServerWriteSettings",
+										"copyBehavior": "PreserveHierarchy"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Google_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"access_id": {
+											"value": "@variables('var_gcp_access_id')",
+											"type": "Expression"
+										},
+										"container": {
+											"value": "@pipeline().parameters.prm_gcp_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('var_gcp_directory')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_AntiVirus_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"directory": {
+											"value": "@variables('var_av_direcotry')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_frequency": {
+				"type": "string",
+				"defaultValue": "weekly"
+			},
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2023-10-12"
+			},
+			"prm_adjust": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_keyvault_url": {
+				"type": "string",
+				"defaultValue": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid/?api-version=7.0"
+			},
+			"prm_gcp_container": {
+				"type": "string",
+				"defaultValue": "acs-dev-general-boc-acss-bucket"
+			},
+			"prm_av_directory_base": {
+				"type": "string",
+				"defaultValue": "acss_intraday"
+			},
+			"prm_gcp_container_historical": {
+				"type": "string",
+				"defaultValue": "acs-prod-general-boc-acss-bucket"
+			},
+			"run_historical": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_keyvault_url_historical": {
+				"type": "string",
+				"defaultValue": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid-historical/?api-version=7.0"
+			}
+		},
+		"variables": {
+			"var_gcp_directory": {
+				"type": "String"
+			},
+			"var_gcp_access_id": {
+				"type": "String"
+			},
+			"var_av_direcotry": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": []
+	}
+}

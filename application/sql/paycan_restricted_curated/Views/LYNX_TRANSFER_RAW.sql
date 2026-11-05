@@ -1,0 +1,29 @@
+﻿CREATE   VIEW [paycan_restricted_curated].[LYNX_TRANSFER_RAW]
+AS SELECT 	[TRANSFER_ID] as transfer_id
+	,[SYSTEM_REFERENCE] as system_reference
+	,[PAYER_REFERENCE] as payer_reference
+	,[CYCLE_DATE] as cycle_date
+	,[INSTITUTION_NUMBER] as institution_number
+	,[INSTITUTION_IRN] as institution_irn
+	,[INSTITUTION_NAME] as institution_name
+	,[INSTITUTION] as institution_short_name
+	,[PARTICIPANT_NUMBER] as participant_number
+	,[PARTICIPANT_BIC] as participant_bic
+	,[PARTICIPANT_NAME] as participant_name
+	,[PARTICIPANT] as participant_short_name
+	,[FROM_ACCOUNT_ID] as from_account_id
+	,[FROM_ACCOUNT_BBAN] as from_account_bban
+	,[FROM_ACCOUNT_NAME] as from_account_name
+	,[FROM_SETTLE_MECH_CD] as from_settle_mech
+	,[TO_ACCOUNT_ID] as to_account_id
+	,[TO_ACCOUNT_BBAN] as to_account_bban
+	,[TO_ACCOUNT_NAME] as to_account_name
+	,[TO_SETTLE_MECH_CD] as to_settle_mech
+	,[TRANSACTION_TYPE] as transaction_type
+	,[AMOUNT] as amount
+	,[LAST_MODIFIED_TS] as last_modified
+	,[STATUS_TYPE_CD] as status_type
+	,[STATUS_CHANGE_TS] as status_change_time
+	,[STATUS_REASON] as status_reason
+	,[STATUS_MILLISECOND_DURATION] as status_millisecond_duration
+FROM [paycan_restricted_curated].[LYNX_TRANSFER];

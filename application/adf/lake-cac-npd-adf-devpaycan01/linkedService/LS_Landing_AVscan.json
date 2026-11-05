@@ -1,0 +1,23 @@
+{
+	"name": "LS_Landing_AVscan",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\INQ9WLAKEAV01\\incoming\\paycan",
+			"userId": "bocqa\\lake_avscan_inqw_s",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_Keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "lake-avscan-password"
+			}
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

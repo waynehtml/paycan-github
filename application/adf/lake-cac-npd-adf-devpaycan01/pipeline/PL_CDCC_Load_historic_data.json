@@ -1,0 +1,141 @@
+{
+	"name": "PL_CDCC_Load_historic_data",
+	"properties": {
+		"activities": [
+			{
+				"name": "Whether land to raw",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.land_to_raw, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Land to Raw",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CDCC_Land_to_Raw_historic_data",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_land_container": {
+										"value": "@pipeline().parameters.prm_land_container",
+										"type": "Expression"
+									},
+									"prm_land_directory": {
+										"value": "@pipeline().parameters.prm_land_directory",
+										"type": "Expression"
+									},
+									"prm_raw_container": {
+										"value": "@pipeline().parameters.prm_raw_container",
+										"type": "Expression"
+									},
+									"prm_raw_directory": {
+										"value": "@pipeline().parameters.prm_raw_directory",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Whether raw to UC",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Whether land to raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.raw_to_uc, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Raw to Standardized",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CDCC_Raw_to_Standardized_hostoric_data",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_raw_container": {
+										"value": "@pipeline().parameters.prm_raw_container",
+										"type": "Expression"
+									},
+									"prm_raw_directory": {
+										"value": "@pipeline().parameters.prm_raw_directory",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory": {
+				"type": "string",
+				"defaultValue": "cdcc/historic_data"
+			},
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/tmx/cdcc/historic_data/working"
+			},
+			"load_type": {
+				"type": "string",
+				"defaultValue": "append"
+			},
+			"land_to_raw": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"raw_to_uc": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"load_result": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDCC/Control"
+		},
+		"annotations": []
+	}
+}

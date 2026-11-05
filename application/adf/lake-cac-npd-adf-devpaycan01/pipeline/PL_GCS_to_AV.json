@@ -1,0 +1,289 @@
+{
+	"name": "PL_GCS_to_AV",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Access ID",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": true
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@pipeline().parameters.prm_keyvault_url",
+						"type": "Expression"
+					},
+					"connectVia": {
+						"referenceName": "IR-SelfHost01",
+						"type": "IntegrationRuntimeReference"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "Set Access ID",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Access ID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_access_id",
+					"value": {
+						"value": "@activity('Get Access ID').output.value",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach File",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup1').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Download Files from Google",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "GoogleCloudStorageReadSettings",
+										"recursive": false,
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "FileServerWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Google_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"access_id": {
+											"value": "@variables('var_access_id')",
+											"type": "Expression"
+										},
+										"container": {
+											"value": "@pipeline().parameters.prm_external_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_external_directory,'/',pipeline().parameters.prm_date,'/')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_AntiVirus_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_landing_directory,'/',pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set Access ID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_config_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_filenames",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Delete Files in Landing",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "ForEach File",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@concat(pipeline().parameters.prm_landing_directory,'/',pipeline().parameters.prm_date)",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			},
+			"prm_external_container": {
+				"type": "string",
+				"defaultValue": "acs-test-general-boc-lynx-bucket"
+			},
+			"prm_external_directory": {
+				"type": "string",
+				"defaultValue": "daily"
+			},
+			"prm_landing_directory": {
+				"type": "string",
+				"defaultValue": "lynx"
+			},
+			"prm_config_container": {
+				"type": "string",
+				"defaultValue": "config-paycan"
+			},
+			"prm_config_directory": {
+				"type": "string",
+				"defaultValue": "lynx"
+			},
+			"prm_filenames": {
+				"type": "string",
+				"defaultValue": "files_ingestion.json"
+			},
+			"prm_keyvault_url": {
+				"type": "string",
+				"defaultValue": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid/?api-version=7.0"
+			}
+		},
+		"variables": {
+			"var_access_id": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Lynx/Dynamic"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:29:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

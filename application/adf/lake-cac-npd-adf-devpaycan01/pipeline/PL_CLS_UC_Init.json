@@ -1,0 +1,70 @@
+{
+	"name": "PL_CLS_UC_Init",
+	"properties": {
+		"activities": [
+			{
+				"name": "Init",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cls/release/01_setup_uc",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Grant",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Init",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cls/release/02_grant_permissions",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "CLS/Dynamic"
+		},
+		"annotations": []
+	}
+}

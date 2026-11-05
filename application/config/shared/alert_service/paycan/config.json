@@ -1,0 +1,371 @@
+{
+  "env": {
+    "dev": {
+      "SubID": "1de5fd2d-2313-461a-acc4-07cdc509cdf4",
+      "ResGroup": "lake-cac-npd-rg-devpaycan",
+      "ADFName": "lake-cac-npd-adf-devpaycan01",
+      "recipients": {
+        "default": "dda-support-dev@bank-banque-canada.ca",
+        "cdcc": "dda-support-dev@bank-banque-canada.ca"
+      }
+    },
+    "stg": {
+      "SubID": "7c0bb47c-1b9b-4cb9-adbc-344efbe85bbc",
+      "ResGroup": "lake-cac-prd-rg-stgpaycan",
+      "ADFName": "lake-cac-prd-adf-stgpaycan01",
+      "recipients": {
+        "default": "datalakemonitoring-stg@bank-banque-canada.ca, dda-support-stg@bank-banque-canada.ca",
+        "cdcc": "datalakemonitoring-stg@bank-banque-canada.ca, dda-support-stg@bank-banque-canada.ca"
+      }
+    },
+    "prd": {
+      "SubID": "7c0bb47c-1b9b-4cb9-adbc-344efbe85bbc",
+      "ResGroup": "lake-cac-prd-rg-prdpaycan",
+      "ADFName": "lake-cac-prd-adf-prdpaycan01",
+      "recipients": {
+        "default": "DataLakeMonitoring-PRD@bank-banque-canada.ca, dda-support@bank-banque-canada.ca",
+        "cdcc": "DataLakeMonitoring-PRD@bank-banque-canada.ca, dda-support@bank-banque-canada.ca, SUP-Oversight_cdcc_data@bank-banque-canada.ca"
+      }
+    }
+  },
+  "predefinedBindings": {
+    "success": {
+      "rule": {
+        "kql": "ADFPipelineRun | sort by TimeGenerated desc | where TimeGenerated >= ago(22m) and PipelineName == '{PipelineName}' and Status == 'Succeeded'  | project RunId, PipelineName, Parameters, Tags, UserProperties, Annotations,  Status, Start, End"
+      },
+      "email": {
+        "recipient": "default",
+        "subject": "Alert: {alert_name} in {env}",
+        "body": "template/success.html"
+      }
+    },
+    "failure": {
+      "rule": {
+        "kql": "ADFPipelineRun | where TimeGenerated >= ago(22m) and PipelineName == '{PipelineName}' and Status == 'Failed' | join kind=inner (ADFActivityRun | where Status == 'Failed' | project PipelineRunId, Errors = ErrorMessage) on $left.RunId == $right.PipelineRunId | sort by TimeGenerated desc | summarize PipelineName = any(PipelineName), Parameters = any(Parameters), Tags = any(Tags), UserProperties = any(UserProperties), Annotations = any(Annotations), Status = any(Status), Start = any(Start), End = any(End), ErrorMessage = strcat_array(make_list(Errors), ' | ') by RunId"
+      },
+      "email": {
+        "recipient": "default",
+        "subject": "Alert: {alert_name} in {env}",
+        "body": "template/failure.html"
+      }
+    },
+    "cancel": {
+      "rule": {
+        "kql": "ADFPipelineRun | sort by TimeGenerated desc | where TimeGenerated >= ago(22m) and PipelineName == '{PipelineName}' and Status == 'Cancelled'  | project RunId, PipelineName, Parameters, Tags, UserProperties, Annotations,  Status, Start, End"
+      },
+      "email": {
+        "recipient": "default",
+        "subject": "Alert: {alert_name} in {env}",
+        "body": "template/cancel.html"
+      }
+    },
+	"absent": {
+      "rule": {
+        "kql": "let ParamPipelineName = '{PipelineName}';let ParamTimeRange=22m;let Log = ADFPipelineRun| where PipelineName == 'PL_Log_Notification' and Status == 'Succeeded' and TimeGenerated > ago(ParamTimeRange) | sort by TimeGenerated desc | extend Params=parse_json(Parameters) | project ParentRunId=tostring(Params.runid), ParentPipelineName = tostring(Params.pipeline), LogKey1=Params.key1, LogKey2=Params.key2, LogKey3=Params.key3;ADFPipelineRun| where Status == 'Succeeded' and PipelineName == ParamPipelineName| sort by TimeGenerated desc| join kind=inner (Log) on $left.RunId == $right.ParentRunId| project RunId,PipelineName,Parameters,Tags,UserProperties,Annotations,Status,Start,End, LogKey1, LogKey2, LogKey3"
+      },
+      "email": {
+        "recipient": "default",
+        "subject": "Alert: {alert_name} in {env}",
+        "body": "template/absent.html"
+      }
+    },
+	"absent_success": {
+      "rule": {
+        "kql": "let ParentPipelineName='{PipelineName}';let NoFilePipelineName='{NoFilePipelineName}';let AlertTimeRange=22m;let FamilyTimeRange=1d;let AllRuns=ADFPipelineRun | where TimeGenerated > ago(FamilyTimeRange) | where Status == 'Succeeded' | extend Predecessor=parse_json(Predecessors) | extend ParentRunId=tostring(Predecessor[0].PipelineRunId);let Level0=AllRuns | where PipelineName==ParentPipelineName and TimeGenerated > ago(AlertTimeRange) | extend Level=0 | extend RootId=RunId;let Level1=AllRuns | join kind=inner Level0 on $left.ParentRunId==$right.RunId | extend Level=1 | extend RootId=ParentRunId;let Level2=AllRuns | join kind=inner Level1 on $left.ParentRunId==$right.RunId | extend Level=2 | extend RootId=ParentRunId2;let Level3=AllRuns | join kind=inner Level2 on $left.ParentRunId==$right.RunId | extend Level=3 | extend RootId=ParentRunId2;let All=Level1 | project TimeGenerated,RootId,PipelineName,Level | union(Level2 | project TimeGenerated,RootId,PipelineName,Level) | union(Level3 | project TimeGenerated,RootId,PipelineName,Level) | order by Level asc,TimeGenerated asc;let Summary=All | summarize SubPipelines=strcat_array(make_list(PipelineName),',') by RootId;let PipelineRun=Level0 | join kind=leftouter Summary on $left.RunId==$right.RootId;PipelineRun | sort by TimeGenerated desc | where SubPipelines !contains NoFilePipelineName | project RunId,PipelineName,Parameters,Tags,UserProperties,Annotations,Status,Start,End,SubPipelines"
+      },
+      "email": {
+        "recipient": "default",
+        "subject": "Alert: {alert_name} in {env}",
+        "body": "template/success.html"
+      }
+    },
+	"absent_nofile": {
+      "rule": {
+        "kql": "let ParentPipelineName='{PipelineName}';let NoFilePipelineName='{NoFilePipelineName}';let AlertTimeRange=22m;let FamilyTimeRange=1d;let AllRuns=ADFPipelineRun | where TimeGenerated > ago(FamilyTimeRange) | where Status == 'Succeeded' | extend Predecessor=parse_json(Predecessors) | extend ParentRunId=tostring(Predecessor[0].PipelineRunId);let Level0=AllRuns | where PipelineName==ParentPipelineName and TimeGenerated > ago(AlertTimeRange) | extend Level=0 | extend RootId=RunId;let Level1=AllRuns | join kind=inner Level0 on $left.ParentRunId==$right.RunId | extend Level=1 | extend RootId=ParentRunId;let Level2=AllRuns | join kind=inner Level1 on $left.ParentRunId==$right.RunId | extend Level=2 | extend RootId=ParentRunId2;let Level3=AllRuns | join kind=inner Level2 on $left.ParentRunId==$right.RunId | extend Level=3 | extend RootId=ParentRunId2;let All=Level1 | project TimeGenerated,RootId,PipelineName,Level | union(Level2 | project TimeGenerated,RootId,PipelineName,Level) | union(Level3 | project TimeGenerated,RootId,PipelineName,Level) | order by Level asc,TimeGenerated asc;let Summary=All | summarize SubPipelines=strcat_array(make_list(PipelineName),',') by RootId;let PipelineRun=Level0 | join kind=inner Summary on $left.RunId==$right.RootId;PipelineRun | sort by TimeGenerated desc | where SubPipelines contains NoFilePipelineName | project RunId,PipelineName,Parameters,Tags,UserProperties,Annotations,Status,Start,End,SubPipelines"
+      },
+      "email": {
+        "recipient": "default",
+        "subject": "Alert: {alert_name} in {env}",
+        "body": "template/absent.html"
+      }
+    }
+  },
+  "alerts": [
+    {
+      "name": "ACSS Daily Cancelled",
+      "status": "enabled",
+      "ref": {
+        "binding": "cancel",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Daily"
+        }
+      }
+    },
+    {
+      "name": "ACSS Daily Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Daily"
+        }
+      }
+    },
+    {
+      "name": "ACSS Daily Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Daily"
+        }
+      }
+    },
+    {
+      "name": "ACSS Monthly Cancelled",
+      "status": "enabled",
+      "ref": {
+        "binding": "cancel",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Monthly"
+        }
+      }
+    },
+    {
+      "name": "ACSS Monthly Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Monthly"
+        }
+      }
+    },
+    {
+      "name": "ACSS Monthly Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Monthly"
+        }
+      }
+    },
+    {
+      "name": "ACSS Weekly Cancelled",
+      "status": "enabled",
+      "ref": {
+        "binding": "cancel",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Weekly"
+        }
+      }
+    },
+    {
+      "name": "ACSS Weekly Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Weekly"
+        }
+      }
+    },
+    {
+      "name": "ACSS Weekly Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_ACSS_Weekly"
+        }
+      }
+    },
+    {
+      "name": "Paycan Cancelled",
+      "status": "enabled",
+      "ref": {
+        "binding": "cancel",
+        "parameter": {
+          "PipelineName": "PL_Control_Main"
+        }
+      }
+    },
+    {
+      "name": "Paycan Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_Control_Main"
+        }
+      }
+    },
+    {
+      "name": "Paycan Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_Control_Main"
+        }
+      }
+    },
+    {
+      "name": "CLS Monthly Cancelled",
+      "status": "enabled",
+      "ref": {
+        "binding": "cancel",
+        "parameter": {
+          "PipelineName": "PL_CLS_Load_All"
+        }
+      }
+    },
+    {
+      "name": "CLS Monthly Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_CLS_Load_All"
+        }
+      }
+    },
+    {
+      "name": "CLS Monthly Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_CLS_Load_All"
+        }
+      }
+    },
+    {
+      "name": "TMX-CDCC Cancelled",
+      "status": "enabled",
+      "recipient": "cdcc",
+      "ref": {
+        "binding": "cancel",
+        "parameter": {
+          "PipelineName": "PL_Main_CDCC"
+        }
+      }
+    },
+    {
+      "name": "TMX-CDCC Failed",
+      "status": "enabled",
+      "recipient": "cdcc",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_Main_CDCC"
+        }
+      }
+    },
+    {
+      "name": "TMX-CDCC Succeeded",
+      "status": "enabled",
+      "recipient": "cdcc",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_Main_CDCC"
+        }
+      }
+    },
+    {
+      "name": "AD-HOC SFTP Service for CDCC Cancelled",
+      "status": "enabled",
+      "recipient": "cdcc",
+      "ref": {
+        "binding": "cancel",
+        "parameter": {
+          "PipelineName": "PL_CDCC_SFTP_folder_to_Raw"
+        }
+      }
+    },
+    {
+      "name": "AD-HOC SFTP Service for CDCC Failed",
+      "status": "enabled",
+      "recipient": "cdcc",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_CDCC_SFTP_folder_to_Raw"
+        }
+      }
+    },
+    {
+      "name": "AD-HOC SFTP Service for CDCC Succeeded",
+      "status": "enabled",
+      "recipient": "cdcc",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_CDCC_SFTP_folder_to_Raw"
+        }
+      }
+    },
+    {
+      "name": "CDS Oversight Ingestion (Single File Trigger) Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_Main_CDS"
+        }
+      }
+    },
+    {
+      "name": "CDS Oversight Ingestion (Single File Trigger) Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_Main_CDS"
+        }
+      }
+    },
+    {
+      "name": "CDS Oversight Daily Ingestion Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_Main_CDS_Daily"
+        }
+      }
+    },
+    {
+      "name": "CDS Oversight Daily Ingestion Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_Main_CDS_Daily"
+        }
+      }
+    },
+    {
+      "name": "RTR Failed",
+      "status": "enabled",
+      "ref": {
+        "binding": "failure",
+        "parameter": {
+          "PipelineName": "PL_RTR_Control_Main"
+        }
+      }
+    },
+    {
+      "name": "RTR Succeeded",
+      "status": "enabled",
+      "ref": {
+        "binding": "success",
+        "parameter": {
+          "PipelineName": "PL_RTR_Control_Main"
+        }
+      }
+    }
+  ]
+}

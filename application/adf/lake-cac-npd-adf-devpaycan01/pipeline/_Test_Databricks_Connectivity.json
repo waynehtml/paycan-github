@@ -1,0 +1,37 @@
+{
+	"name": "_Test_Databricks_Connectivity",
+	"properties": {
+		"activities": [
+			{
+				"name": "Test_Connectivity",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.00:03:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/lynx/tests/test_connectivity",
+					"baseParameters": {
+						"storage_name": {
+							"value": "@pipeline().globalParameters.gpm_storage",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "Lynx/Tests"
+		},
+		"annotations": []
+	}
+}

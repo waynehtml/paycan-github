@@ -1,0 +1,189 @@
+{
+	"name": "PL_land_to_raw_cibc_rbc",
+	"properties": {
+		"activities": [
+			{
+				"name": "Move CIBC Data to Raw Zone",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"deleteFilesAfterCompletion": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.pm_container_landing",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.pm_directory_cibc_landing",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Raw_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.pm_container_restricted",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(pipeline().parameters.pm_directory_raw,'/','cibc')",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Move RBC Data to Raw",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Move CIBC Data to Raw Zone",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"deleteFilesAfterCompletion": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.pm_container_landing",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.pm_directory_rbc_landing",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Raw_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.pm_container_restricted",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(pipeline().parameters.pm_directory_raw,'/','rbc')",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"pm_container_landing": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"pm_directory_cibc_landing": {
+				"type": "string",
+				"defaultValue": "cibc"
+			},
+			"pm_container_restricted": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"pm_directory_raw": {
+				"type": "string",
+				"defaultValue": "raw/external/payments_canada/acss_participant_stream_level"
+			},
+			"pm_directory_rbc_landing": {
+				"type": "string",
+				"defaultValue": "rbc"
+			}
+		},
+		"folder": {
+			"name": "ACSS_participant_stream_level/Dynamic"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:28:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

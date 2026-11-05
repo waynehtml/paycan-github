@@ -1,0 +1,362 @@
+{
+	"name": "PL_Control_Multiple_Days",
+	"properties": {
+		"description": "A Pipeline to run multiple days sequentially. Note: Currently the maximum number of days that can be run is 5.",
+		"activities": [
+			{
+				"name": "Until Days Reached",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Set Current Runs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Current Date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Number of Days",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(int(variables('var_current_number_of_runs')),int(variables('var_number_of_days')))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Set Temp Number Of Runs",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_temp_number_of_runs",
+								"value": {
+									"value": "@variables('var_current_number_of_runs')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Increment Current Runs",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "If Weekend Date",
+									"dependencyConditions": [
+										"Succeeded",
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_current_number_of_runs",
+								"value": {
+									"value": "@string(add(int(variables('var_temp_number_of_runs')),1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Temp Date",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_temp_current_date",
+								"value": {
+									"value": "@variables('var_current_date')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Increment Current Date",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "If Weekend Date",
+									"dependencyConditions": [
+										"Succeeded",
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_current_date",
+								"value": {
+									"value": "@string(formatDateTime(adddays(variables('var_temp_current_date'),1),'yyyy-MM-dd'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Find Day Of The Week",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set Temp Date",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set Temp Number Of Runs",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_day_of_the_week",
+								"value": {
+									"value": "@formatDateTime(formatDateTime(variables('var_temp_current_date'),'yyyy-MM-dd'),'dddd')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "If Weekend Date",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Find Day Of The Week",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@or(equals(string(variables('var_day_of_the_week')),'Saturday'),equals(string(variables('var_day_of_the_week')),'Sunday'))",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "PL_Control_Main",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"policy": {
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "PL_Control_Main",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"prm_date": {
+													"value": "@variables('var_temp_current_date')",
+													"type": "Expression"
+												},
+												"prm_run_extract_from_GCS": {
+													"value": "@pipeline().parameters.prm_run_extract_from_GCS",
+													"type": "Expression"
+												},
+												"prm_run_AV_to_land": {
+													"value": "@pipeline().parameters.prm_run_AV_to_land",
+													"type": "Expression"
+												},
+												"prm_run_land_to_raw": {
+													"value": "@pipeline().parameters.prm_run_land_to_raw",
+													"type": "Expression"
+												},
+												"prm_run_raw_to_standard": {
+													"value": "@pipeline().parameters.prm_run_raw_to_standard",
+													"type": "Expression"
+												},
+												"prm_run_standard_to_curated": {
+													"value": "@pipeline().parameters.prm_run_standard_to_curated",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									{
+										"name": "PL_Control_Main_copy1",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"policy": {
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "PL_Control_Main",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"prm_date": {
+													"value": "@variables('var_temp_current_date')",
+													"type": "Expression"
+												},
+												"prm_run_extract_from_GCS": {
+													"value": "@pipeline().parameters.prm_run_extract_from_GCS",
+													"type": "Expression"
+												},
+												"prm_run_AV_to_land": {
+													"value": "@pipeline().parameters.prm_run_AV_to_land",
+													"type": "Expression"
+												},
+												"prm_run_land_to_raw": {
+													"value": "@pipeline().parameters.prm_run_land_to_raw",
+													"type": "Expression"
+												},
+												"prm_run_raw_to_standard": {
+													"value": "@pipeline().parameters.prm_run_raw_to_standard",
+													"type": "Expression"
+												},
+												"prm_run_standard_to_curated": {
+													"value": "@pipeline().parameters.prm_run_standard_to_curated",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "Set Current Runs",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_current_number_of_runs",
+					"value": "0"
+				}
+			},
+			{
+				"name": "Set Current Date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_current_date",
+					"value": {
+						"value": "@pipeline().parameters.prm_start_date",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Number of Days",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_number_of_days",
+					"value": {
+						"value": "@pipeline().parameters.prm_number_of_days",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_start_date": {
+				"type": "string"
+			},
+			"prm_number_of_days": {
+				"type": "string"
+			},
+			"prm_run_extract_from_GCS": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_AV_to_land": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_land_to_raw": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_raw_to_standard": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_standard_to_curated": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"var_current_number_of_runs": {
+				"type": "String"
+			},
+			"var_current_date": {
+				"type": "String"
+			},
+			"var_number_of_days": {
+				"type": "String"
+			},
+			"var_temp_number_of_runs": {
+				"type": "String"
+			},
+			"var_temp_current_date": {
+				"type": "String"
+			},
+			"var_day_of_the_week": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Lynx/Control"
+		},
+		"annotations": []
+	}
+}

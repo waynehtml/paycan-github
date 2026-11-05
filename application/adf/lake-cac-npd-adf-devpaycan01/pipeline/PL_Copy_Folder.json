@@ -1,0 +1,170 @@
+{
+	"name": "PL_Copy_Folder",
+	"properties": {
+		"description": "Copy everything inside single folder to destination, for example, with prm_src_directory = kaiko-sync/Trade and prm_dst_directory =  raw/external/kaiko/Trade, everything from the source Trade folder will be copied into the destination Trade folder. The destination Trade folder will be created.",
+		"activities": [
+			{
+				"name": "Copy",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set source storage account",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set destination storage account",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "@pipeline().parameters.prm_src_directory",
+								"type": "Expression"
+							},
+							"deleteFilesAfterCompletion": false
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ADSLG2",
+						"type": "DatasetReference",
+						"parameters": {
+							"storage": {
+								"value": "@variables('var_src_storage_account')",
+								"type": "Expression"
+							},
+							"container": {
+								"value": "@pipeline().parameters.prm_src_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_src_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADSLG2",
+						"type": "DatasetReference",
+						"parameters": {
+							"storage": {
+								"value": "@variables('var_dst_storage_account')",
+								"type": "Expression"
+							},
+							"container": {
+								"value": "@pipeline().parameters.prm_dst_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_dst_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Set source storage account",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_src_storage_account",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_src_land_or_lake, 1),pipeline().globalParameters.gpm_storage_config,pipeline().globalParameters.gpm_storage)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set destination storage account",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_dst_storage_account",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_dst_land_or_lake, 1),pipeline().globalParameters.gpm_storage_config,pipeline().globalParameters.gpm_storage)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_src_land_or_lake": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_src_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_src_directory": {
+				"type": "string",
+				"defaultValue": "kaiko-sync"
+			},
+			"prm_dst_land_or_lake": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_dst_container": {
+				"type": "string",
+				"defaultValue": "data"
+			},
+			"prm_dst_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/kaiko"
+			}
+		},
+		"variables": {
+			"var_src_storage_account": {
+				"type": "String"
+			},
+			"var_dst_storage_account": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": []
+	}
+}

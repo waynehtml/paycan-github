@@ -1,0 +1,81 @@
+
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - application/log_analytics/*
+
+resources: 
+  repositories: 
+  - repository: templates
+    name: lake-devops/lake-devops
+    endpoint: git_pull
+    type: git
+    ref: main
+
+pool:
+  name:  azdv-dagp-npdagntpl01
+
+variables:
+- template: /application/log_analytics/config/success/cac/dev.yaml
+
+extends:
+  template: pipelines/extends.yaml@templates
+  parameters:
+    buildJobs:
+    - template: pipelines/log_analytics/get_bicep_artifact.yaml@templates
+      parameters:
+        bicep_file_name: 'log_analytics_general.bicep'
+
+    deployStages: 
+    - stage: ver
+      displayName: Install Pre-Requisites
+      jobs:
+      - job: install_bicep
+        steps:
+        - script: | 
+            az bicep install
+            az bicep version
+
+    - stage: deploy
+      displayName: Deploy Bicep Template
+      jobs:
+      - job: deploy_bicep_template
+        steps:
+        - download: current
+          artifact: 'BicepArtifact'
+          displayName: Download Bicep File Template
+
+        - script: | 
+            az bicep build -f $(Pipeline.Workspace)\BicepArtifact\log_analytics_general.bicep
+          displayName: Validate Bicep File
+
+        - task: AzureResourceManagerTemplateDeployment@3
+          displayName: Deploy Bicep Template
+          inputs:
+            deploymentScope: 'Resource Group'
+            azureResourceManagerConnection: 'lake-dscn-bocqa01'
+            action: 'Create Or Update Resource Group'
+            resourceGroupName: $(cac_dev_resourceGroupName)
+            location: $(cac_dev_location)
+            templateLocation: 'Linked artifact'
+            csmFile: $(Pipeline.Workspace)\BicepArtifact\log_analytics_general.bicep
+            overrideParameters: 
+              -workspaceName "$(cac_dev_workspaceName)"
+              -queryName "$(cac_dev_queryName)"
+              -location "$(cac_dev_location)"
+              -description "$(cac_dev_description)"
+              -displayName "$(cac_dev_displayName)"
+              -workspaceResourceGroup "$(cac_dev_workspaceResourceGroup)"
+              -actionGroupName "$(cac_dev_actionGroupName)"
+              -actionResourceGroup "$(cac_dev_actionResourceGroup)"
+              -operator "$(cac_dev_operator)"
+              -query "$(cac_dev_query)"
+              -threshold "$(cac_dev_threshold)"
+              -timeAggregation "$(cac_dev_timeAggregation)"
+              -severity "$(cac_dev_severity)"
+            deploymentMode: 'Incremental'
+            deploymentName: 'DeployPipelineTemplate'
+

@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+      - staging
+  paths:
+    include:
+      - application/adf/*
+
+resources:
+  repositories:
+    - repository: templates                     # Reference shared DevOps repo
+      type: git
+      name: lake-devops/lake-devops
+      ref: refs/heads/main
+
+pool:
+  name:  dops-prdagntpl01
+    
+variables:
+- template: ../application/adf/pipeline-configs/cac-dev.yaml
+- template: ../application/adf/pipeline-configs/cac-stg.yaml
+
+
+extends:
+  template: pipelines/azure_data_factory/stg.yaml@templates

@@ -1,0 +1,28 @@
+{
+	"name": "LS_GCS",
+	"properties": {
+		"type": "GoogleCloudStorage",
+		"annotations": [],
+		"typeProperties": {
+			"serviceUrl": "https://storage.googleapis.com",
+			"accessKeyId": "@{linkedService().AccessKeyId}",
+			"secretAccessKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_Keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "st-paycangcs-accesskeysecret"
+			}
+		},
+		"parameters": {
+			"AccessKeyId": {
+				"type": "String"
+			}
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

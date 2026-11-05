@@ -1,0 +1,367 @@
+{
+	"name": "PL_Delete_Folder_ex",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set storage account",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_storage_account",
+					"value": {
+						"value": "@if(equals(pipeline().parameters.prm_land_or_lake, 1),pipeline().globalParameters.gpm_storage_config,pipeline().globalParameters.gpm_storage)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set base directory",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_directory_base",
+					"value": {
+						"value": "@if(contains(pipeline().parameters.prm_directory,'/'), substring(pipeline().parameters.prm_directory, 0, lastIndexOf(pipeline().parameters.prm_directory, '/')), null)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set directory pattern",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_directory_pattern",
+					"value": {
+						"value": "@if(contains(pipeline().parameters.prm_directory,'/'), substring(pipeline().parameters.prm_directory, add(lastIndexOf(pipeline().parameters.prm_directory, '/') , 1), sub(length(pipeline().parameters.prm_directory), add(lastIndexOf(pipeline().parameters.prm_directory, '/'), 1))), pipeline().parameters.prm_directory)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Directory pattern switch",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "list subdirs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@if(contains(variables('var_directory_pattern'),','),'comma',if(contains(variables('var_directory_pattern'),'*'),'asterisk','default'))",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "comma",
+							"activities": [
+								{
+									"name": "Filter in multiple folders",
+									"type": "Filter",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"items": {
+											"value": "@activity('list subdirs').output.childItems",
+											"type": "Expression"
+										},
+										"condition": {
+											"value": "@contains(split(variables('var_directory_pattern'), ','), item().name)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set directory items for multiple folders",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Filter in multiple folders",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_directory_items",
+										"value": {
+											"value": "@activity('Filter in multiple folders').output.value",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "asterisk",
+							"activities": [
+								{
+									"name": "Filter in all folders",
+									"type": "Filter",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"items": {
+											"value": "@activity('list subdirs').output.childItems",
+											"type": "Expression"
+										},
+										"condition": {
+											"value": "@equals(item().type,'Folder')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set directory items for all subfolders",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Filter in all folders",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "var_directory_items",
+										"value": {
+											"value": "@activity('Filter in all folders').output.value",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "Filter in single folder",
+							"type": "Filter",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"items": {
+									"value": "@activity('list subdirs').output.childItems",
+									"type": "Expression"
+								},
+								"condition": {
+									"value": "@equals(item().name, variables('var_directory_pattern'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set directory items for single folder",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Filter in single folder",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "var_directory_items",
+								"value": {
+									"value": "@activity('Filter in single folder').output.value",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "list subdirs",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Set storage account",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set base directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set directory pattern",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_ADSLG2",
+						"type": "DatasetReference",
+						"parameters": {
+							"storage": {
+								"value": "@variables('var_storage_account')",
+								"type": "Expression"
+							},
+							"container": {
+								"value": "@pipeline().parameters.prm_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@variables('var_directory_base')",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach directory",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Directory pattern switch",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('var_directory_items')",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Delete",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_ADSLG2",
+									"type": "DatasetReference",
+									"parameters": {
+										"storage": {
+											"value": "@variables('var_storage_account')",
+											"type": "Expression"
+										},
+										"container": {
+											"value": "@pipeline().parameters.prm_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@if(equals(variables('var_directory_base'),null),item().name,concat(variables('var_directory_base'),'/',item().name))\n",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_land_or_lake": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_container": {
+				"type": "string",
+				"defaultValue": "data"
+			},
+			"prm_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/kaiko/Test"
+			}
+		},
+		"variables": {
+			"var_storage_account": {
+				"type": "String"
+			},
+			"var_directory_base": {
+				"type": "String"
+			},
+			"var_directory_pattern": {
+				"type": "String"
+			},
+			"var_directory_items": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": []
+	}
+}

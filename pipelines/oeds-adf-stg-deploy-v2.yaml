@@ -1,0 +1,40 @@
+# Copy this staging wrapper into a domain repository and register it as a pipeline.
+# The domain repository owns the ADF variable templates under /application/adf/pipeline-configs/.
+
+# Dependent repository variable templates:
+# - /pipelines/variables/common.yaml:
+#   - agent_pool_name
+#   - agent_image
+# - /application/adf/pipeline-configs/cac-dev.yaml:
+#   - adf_dev_datafactory_name
+#   - adf_dev_subscription_id
+#   - adf_dev_resource_group
+# - /application/adf/pipeline-configs/cac-stg.yaml:
+#   - adf_stg_datafactory_name
+#   - adf_stg_subscription_id
+#   - adf_stg_resource_group
+#   - adf_stg_region
+#   - adf_stg_service_connection
+#   - adf_stg_trigger_config_file
+
+trigger: none
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: lake-devops/lake-devops
+      ref: refs/heads/main
+
+variables:
+  - template: /pipelines/variables/common.yaml
+  - template: ../application/adf/pipeline-configs/cac-dev.yaml
+  - template: ../application/adf/pipeline-configs/cac-stg.yaml
+
+pool:
+  name: $(agent_pool_name)
+  demands:
+    - ImageOverride -equals $(agent_image)
+
+extends:
+  template: pipelines/azure_data_factory/stg2.yaml@templates

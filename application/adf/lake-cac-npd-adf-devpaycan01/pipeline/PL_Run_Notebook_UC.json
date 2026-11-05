@@ -1,0 +1,50 @@
+{
+	"name": "PL_Run_Notebook_UC",
+	"properties": {
+		"description": "Run a Databrick notebook with parameters in a JSON string",
+		"activities": [
+			{
+				"name": "Run notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/common/run_notebook",
+					"baseParameters": {
+						"notebook": {
+							"value": "@pipeline().parameters.notebook",
+							"type": "Expression"
+						},
+						"parameter": {
+							"value": "@string(pipeline().parameters.parameter)",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"notebook": {
+				"type": "string"
+			},
+			"parameter": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": []
+	}
+}

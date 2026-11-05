@@ -1,0 +1,20 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_MINUM_BALANCE]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_MINUM_BALANCE];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_MINUM_BALANCE](
+	[LYNX_MINUM_BALANCE_ID] [bigint] NOT NULL,
+	[BATCH_ID] [int] NOT NULL,
+	[VALIDATION_STATUS] [bit] NULL,
+	[CYCLE_DATE] [date] NULL,
+	[INSTITUTION] [varchar](100) NULL,
+	[PARTICIPANT] [varchar](100) NULL,
+	[SETTLEMENT_MECHANISM_CD] [varchar](25) NULL,
+	[MINIMUM_AMOUNT] [decimal](30, 2) NULL,
+	[MET_TS] [datetime] NULL,
+	[LAST_MODIFIED_TS] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[LYNX_MINUM_BALANCE_ID] ASC,
+	[BATCH_ID] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];

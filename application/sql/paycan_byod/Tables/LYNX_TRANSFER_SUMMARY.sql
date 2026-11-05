@@ -1,0 +1,26 @@
+﻿CREATE TABLE [paycan_byod].[LYNX_TRANSFER_SUMMARY] (
+    [BATCH_ID]            INT             NULL,
+    [TRANSFER_ID]         BIGINT          NULL,
+    [PAYER_REFERENCE]     VARCHAR (100)   NULL,
+    [CYCLE_DATE]          DATE            NULL,
+    [INSTITUTION]         VARCHAR (100)   NULL,
+    [PARTICIPANT]         VARCHAR (100)   NULL,
+    [FROM_ACCOUNT_BBAN]   VARCHAR (100)   NULL,
+    [FROM_ACCOUNT_NAME]   VARCHAR (100)   NULL,
+    [FROM_SETTLE_MECH_CD] VARCHAR (100)   NULL,
+    [TO_ACCOUNT_BBAN]     VARCHAR (100)   NULL,
+    [TO_ACCOUNT_NAME]     VARCHAR (100)   NULL,
+    [TO_SETTLE_MECH_CD]   VARCHAR (100)   NULL,
+    [TRANSACTION_TYPE]    VARCHAR (100)   NULL,
+    [AMOUNT]              DECIMAL (22, 2) NULL,
+    [REGISTERED_TIME]     DATETIME        NULL,
+    [SETTLED_TIME]        DATETIME        NULL,
+    [PROCESSED_TIME]      DATETIME        NULL,
+    [DIARISED_TIME]       DATETIME        NULL,
+    [REGISTERED]          TINYINT         NULL,
+    [SETTLED]             TINYINT         NULL,
+    [PROCESSED]           TINYINT         NULL,
+    [DIARISED]            TINYINT         NULL,
+    [TOTAL_DURATION]      BIGINT          NULL
+);
+

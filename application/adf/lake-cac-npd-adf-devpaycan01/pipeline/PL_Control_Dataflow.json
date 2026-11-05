@@ -1,0 +1,399 @@
+{
+	"name": "PL_Control_Dataflow",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set Date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_date",
+					"value": {
+						"value": "@pipeline().parameters.prm_date",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Run Raw to Standard",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run Land to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_raw_to_standard,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Raw to Standardized",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Raw_to_Standardized_UC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@variables('var_date')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run Standard to Curated",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run Raw to Standard",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_standard_to_curated,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Standardized to Curated",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Standardized_to_Curated_UC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@variables('var_date')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run Extraction from GCS",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set Date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_extract_from_GCS,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Extraction from GCS",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_GCS_to_AV",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@variables('var_date')",
+										"type": "Expression"
+									},
+									"prm_external_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_gcp,null), pipeline().globalParameters.gpm_container_gcp, pipeline().parameters.prm_container_gcp)",
+										"type": "Expression"
+									},
+									"prm_external_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_gcp,null),pipeline().globalParameters.gpm_directory_gcp, pipeline().parameters.prm_directory_gcp)",
+										"type": "Expression"
+									},
+									"prm_landing_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_landing,null), pipeline().globalParameters.gpm_directory_landing, pipeline().parameters.prm_directory_landing)",
+										"type": "Expression"
+									},
+									"prm_config_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_config,null), pipeline().globalParameters.gpm_container_config, pipeline().parameters.prm_container_config)",
+										"type": "Expression"
+									},
+									"prm_config_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_config,null), pipeline().globalParameters.gpm_directory_config, pipeline().parameters.prm_directory_config)",
+										"type": "Expression"
+									},
+									"prm_filenames": {
+										"value": "@if(equals(pipeline().parameters.prm_config_file_ingestion,null), pipeline().globalParameters.gpm_config_file_ingestion, pipeline().parameters.prm_config_file_ingestion)",
+										"type": "Expression"
+									},
+									"prm_keyvault_url": {
+										"value": "@if(equals(pipeline().parameters.prm_keyvault_url,null), pipeline().globalParameters.gpm_keyvault_url, pipeline().parameters.prm_keyvault_url)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run AV to Land",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run Extraction from GCS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_AV_to_land,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_AV_to_Land",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_AV_to_Land",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@variables('var_date')",
+										"type": "Expression"
+									},
+									"prm_land_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_landing,null),pipeline().globalParameters.gpm_container_landing, pipeline().parameters.prm_container_landing)",
+										"type": "Expression"
+									},
+									"prm_land_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_landing,null),pipeline().globalParameters.gpm_directory_landing, pipeline().parameters.prm_directory_landing)",
+										"type": "Expression"
+									},
+									"prm_av_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_antivirus,null),pipeline().globalParameters.gpm_directory_antivirus, pipeline().parameters.prm_directory_antivirus)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run Land to Raw",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run AV to Land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_land_to_raw,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Landing to Raw",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Land_to_Raw",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@variables('var_date')",
+										"type": "Expression"
+									},
+									"prm_landing_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_landing,null), pipeline().globalParameters.gpm_container_landing, pipeline().parameters.prm_container_landing)",
+										"type": "Expression"
+									},
+									"prm_landing_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_landing,null), pipeline().globalParameters.gpm_directory_landing, pipeline().parameters.prm_directory_landing)",
+										"type": "Expression"
+									},
+									"prm_raw_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_restricted,null), pipeline().globalParameters.gpm_container_restricted, pipeline().parameters.prm_container_restricted)",
+										"type": "Expression"
+									},
+									"prm_raw_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_raw,null), pipeline().globalParameters.gpm_directory_raw, pipeline().parameters.prm_directory_raw)",
+										"type": "Expression"
+									},
+									"prm_config_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_config,null), pipeline().globalParameters.gpm_container_config, pipeline().parameters.prm_container_config)",
+										"type": "Expression"
+									},
+									"prm_config_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_config,null), pipeline().globalParameters.gpm_directory_config, pipeline().parameters.prm_directory_config)",
+										"type": "Expression"
+									},
+									"prm_filenames": {
+										"value": "@if(equals(pipeline().parameters.prm_config_file_ingestion,null), pipeline().globalParameters.gpm_config_file_ingestion, pipeline().parameters.prm_config_file_ingestion)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "yyyy-MM-dd"
+			},
+			"prm_container_restricted": {
+				"type": "string"
+			},
+			"prm_container_config": {
+				"type": "string"
+			},
+			"prm_container_gcp": {
+				"type": "string"
+			},
+			"prm_container_landing": {
+				"type": "string"
+			},
+			"prm_storage": {
+				"type": "string"
+			},
+			"prm_storage_config": {
+				"type": "string"
+			},
+			"prm_directory_config": {
+				"type": "string"
+			},
+			"prm_directory_gcp": {
+				"type": "string"
+			},
+			"prm_directory_landing": {
+				"type": "string"
+			},
+			"prm_directory_raw": {
+				"type": "string"
+			},
+			"prm_directory_standard": {
+				"type": "string"
+			},
+			"prm_directory_curated": {
+				"type": "string"
+			},
+			"prm_config_file_ingestion": {
+				"type": "string"
+			},
+			"prm_config_file_standard": {
+				"type": "string"
+			},
+			"prm_config_file_holidays": {
+				"type": "string"
+			},
+			"prm_config_file_tables_publish": {
+				"type": "string"
+			},
+			"prm_keyvault_url": {
+				"type": "string"
+			},
+			"prm_directory_antivirus": {
+				"type": "string"
+			},
+			"prm_run_raw_to_standard": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_standard_to_curated": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_extract_from_GCS": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_AV_to_land": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_land_to_raw": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"var_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Lynx/Control"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-29T16:03:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

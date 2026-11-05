@@ -1,0 +1,101 @@
+﻿CREATE   PROCEDURE [paycan_restricted_curated].[SP_MERGE_LYNX_PAUSE_PAYMENTS]
+AS
+BEGIN
+
+MERGE [paycan_restricted_curated].[LYNX_PAUSE_PAYMENTS] AS [Target]          
+USING [paycan_restricted_standardized].[LYNX_PAUSE_PAYMENTS] AS [Source]           
+    ON	[Target].[LYNX_PAUSE_PAYMENTS_ID]	= [Source].[LYNX_PAUSE_PAYMENTS_ID] and
+		[Target].[BATCH_ID]					= [Source].[BATCH_ID]
+WHEN MATCHED THEN
+  UPDATE SET 
+	[Target].[VALIDATION_STATUS]			=	[Source].[VALIDATION_STATUS], 
+	[Target].[PAUSE_PAYMENTS_ID]			=	[Source].[PAUSE_PAYMENTS_ID], 
+	[Target].[CYCLE_DATE]					=	[Source].[CYCLE_DATE], 
+	[Target].[INSTITUTION_NUMBER]			=	[Source].[INSTITUTION_NUMBER], 
+	[Target].[INSTITUTION_IRN]				=	[Source].[INSTITUTION_IRN],
+	[Target].[INSTITUTION_NAME]				=	[Source].[INSTITUTION_NAME], 
+	[Target].[PARTICIPANT_NUMBER]			=	[Source].[PARTICIPANT_NUMBER], 
+	[Target].[PARTICIPANT_BIC]				=	[Source].[PARTICIPANT_BIC], 
+	[Target].[PARTICIPANT_NAME]				=	[Source].[PARTICIPANT_NAME], 
+	[Target].[CONTRA_INSTITUTION_NUMBER]	=	[Source].[CONTRA_INSTITUTION_NUMBER], 
+	[Target].[CONTRA_INSTITUTION_IRN]		=	[Source].[CONTRA_INSTITUTION_IRN], 
+	[Target].[CONTRA_INSTITUTION_NAME]		=	[Source].[CONTRA_INSTITUTION_NAME], 
+	[Target].[CONTRA_PARTICIPANT_NUMBER]	=	[Source].[CONTRA_PARTICIPANT_NUMBER],
+	[Target].[CONTRA_PARTICIPANT_BIC]		=	[Source].[CONTRA_PARTICIPANT_BIC],
+	[Target].[CONTRA_PARTICIPANT_NAME]		=	[Source].[CONTRA_PARTICIPANT_NAME], 
+	[Target].[INSTITUTION]					=	[Source].[INSTITUTION], 
+	[Target].[PARTICIPANT]					=	[Source].[PARTICIPANT], 
+	[Target].[ORIGINATOR_REFERENCE]			=	[Source].[ORIGINATOR_REFERENCE], 
+	[Target].[REGISTERED_TS]				=	[Source].[REGISTERED_TS], 
+	[Target].[EFFECTIVE_TS]					=	[Source].[EFFECTIVE_TS], 
+	[Target].[LAST_MODIFIED_TS]				=	[Source].[LAST_MODIFIED_TS], 
+	[Target].[CONTRA_INSTITUTION_ACTION]	=	[Source].[CONTRA_INSTITUTION_ACTION],
+	[Target].[CONTRA_INSTITUTION]			=	[Source].[CONTRA_INSTITUTION], 
+	[Target].[CONTRA_PARTICIPANT]			=	[Source].[CONTRA_PARTICIPANT], 
+	[Target].[ingestion_date]				=	[Source].[ingestion_date],
+	[Target].[batch_date]					=	[Source].[batch_date]	
+WHEN NOT MATCHED THEN 
+	INSERT
+	(
+		[LYNX_PAUSE_PAYMENTS_ID], 
+		[BATCH_ID], 
+		[VALIDATION_STATUS], 
+		[PAUSE_PAYMENTS_ID], 
+		[CYCLE_DATE], 
+		[INSTITUTION_NUMBER], 
+		[INSTITUTION_IRN],
+		[INSTITUTION_NAME], 
+		[PARTICIPANT_NUMBER], 
+		[PARTICIPANT_BIC], 
+		[PARTICIPANT_NAME], 
+		[CONTRA_INSTITUTION_NUMBER], 
+		[CONTRA_INSTITUTION_IRN], 
+		[CONTRA_INSTITUTION_NAME], 
+		[CONTRA_PARTICIPANT_NUMBER],
+		[CONTRA_PARTICIPANT_BIC],
+		[CONTRA_PARTICIPANT_NAME], 
+		[INSTITUTION], 
+		[PARTICIPANT], 
+		[ORIGINATOR_REFERENCE], 
+		[REGISTERED_TS], 
+		[EFFECTIVE_TS], 
+		[LAST_MODIFIED_TS], 
+		[CONTRA_INSTITUTION_ACTION],
+		[CONTRA_INSTITUTION], 
+		[CONTRA_PARTICIPANT], 
+		[ingestion_date],
+		[batch_date]
+	)
+	VALUES
+	(
+		[Source].[LYNX_PAUSE_PAYMENTS_ID], 
+		[Source].[BATCH_ID], 
+		[Source].[VALIDATION_STATUS], 
+		[Source].[PAUSE_PAYMENTS_ID], 
+		[Source].[CYCLE_DATE], 
+		[Source].[INSTITUTION_NUMBER], 
+		[Source].[INSTITUTION_IRN],
+		[Source].[INSTITUTION_NAME], 
+		[Source].[PARTICIPANT_NUMBER], 
+		[Source].[PARTICIPANT_BIC], 
+		[Source].[PARTICIPANT_NAME], 
+		[Source].[CONTRA_INSTITUTION_NUMBER], 
+		[Source].[CONTRA_INSTITUTION_IRN], 
+		[Source].[CONTRA_INSTITUTION_NAME], 
+		[Source].[CONTRA_PARTICIPANT_NUMBER],
+		[Source].[CONTRA_PARTICIPANT_BIC],
+		[Source].[CONTRA_PARTICIPANT_NAME], 
+		[Source].[INSTITUTION], 
+		[Source].[PARTICIPANT], 
+		[Source].[ORIGINATOR_REFERENCE], 
+		[Source].[REGISTERED_TS], 
+		[Source].[EFFECTIVE_TS], 
+		[Source].[LAST_MODIFIED_TS], 
+		[Source].[CONTRA_INSTITUTION_ACTION],
+		[Source].[CONTRA_INSTITUTION], 
+		[Source].[CONTRA_PARTICIPANT], 
+		[Source].[ingestion_date],
+		[Source].[batch_date]
+	);
+
+END

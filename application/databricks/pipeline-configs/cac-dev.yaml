@@ -1,0 +1,15 @@
+variables:
+  - name: dbx_dev_workspace_url
+    value: https://adb-1700301391505163.3.azuredatabricks.net
+  - name: dbx_dev_project_path
+    value: databricks_notebooks
+  - name: dbx_dev_destination_path
+    value: /paycan
+  - name: dbx_dev_cluster_id
+    value: 0802-152904-vbe5wy6h
+  - name: dbx_dev_repo_notebook_location
+    value: application/databricks/paycan
+  - name: dbx_dev_test_path
+    value: databricks_notebooks\lynx\tests
+  - name: dbx_dev_delete_path
+    value: /paycan

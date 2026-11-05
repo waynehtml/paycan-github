@@ -1,0 +1,199 @@
+{
+	"name": "PL_CDCC_Land_to_Raw_historic_data",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get file list in land",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_land_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_land_directory",
+								"type": "Expression"
+							},
+							"filename": "@null"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Move to Raw historic working folder",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get file list in land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get file list in land').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy land file",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@pipeline().parameters.prm_land_directory",
+											"type": "Expression"
+										},
+										"filename": "@item().name"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_raw_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@pipeline().parameters.prm_raw_directory",
+											"type": "Expression"
+										},
+										"filename": "@item().name"
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete land file",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Copy land file",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@pipeline().parameters.prm_land_directory",
+											"type": "Expression"
+										},
+										"filename": "@item().name"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory": {
+				"type": "string",
+				"defaultValue": "cdcc/historic_data"
+			},
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/tmx/cdcc/historic_data/working"
+			}
+		},
+		"folder": {
+			"name": "CDCC/Dynamic"
+		},
+		"annotations": []
+	}
+}

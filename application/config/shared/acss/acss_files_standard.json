@@ -1,0 +1,96 @@
+{
+	"acss_usbe_sets":{
+		"system_code":{
+			"data_type": "STRING",
+			"c_name": "system_code",
+			"spark_val": "StringType"
+		},
+		"settlement_date":{
+			"data_type": "INT64",
+			"c_name": "settlement_date",
+			"spark_val": "LongType"
+		},
+		"sending_dc_irn":{
+			"data_type": "INT64",
+			"c_name": "sending_dc_irn",
+			"spark_val": "LongType"
+		},
+		"sending_dc_name":{
+			"data_type": "STRING",
+			"c_name": "sending_dc_name",
+			"spark_val": "StringType"
+		},
+		"receiving_dc_irn":{
+			"data_type": "INT64",
+			"c_name": "receiving_dc_irn",
+			"spark_val": "LongType"
+		},
+		"receiving_dc_name":{
+			"data_type": "STRING",
+			"c_name": "receiving_dc_name",
+			"spark_val": "StringType"
+		},
+		"sets_volume":{
+			"data_type": "INT64",
+			"c_name": "sets_volume",
+			"spark_val": "LongType"
+		},
+		"sets_value":{
+			"data_type": "DOUBLE",
+			"c_name": "sets_value",
+			"spark_val": "DoubleType"
+		}
+	},
+	"acss_usbe_vol_val":{
+		"system_code":{
+			"data_type": "STRING",
+			"c_name": "system_code",
+			"spark_val": "StringType"
+		},
+		"settlement_date":{
+			"data_type": "STRING",
+			"c_name": "settlement_date",
+			"spark_val": "StringType"
+		},
+		"sending_dc_irn":{
+			"data_type": "STRING",
+			"c_name": "sending_dc_irn",
+			"spark_val": "StringType"
+		},
+		"sending_dc_name":{
+			"data_type": "STRING",
+			"c_name": "sending_dc_name",
+			"spark_val": "StringType"
+		},
+		 "receiving_dc_irn":{
+			"data_type": "STRING",
+			"c_name": "receiving_dc_irn",
+			"spark_val": "StringType"
+		},
+		"receiving_dc_name":{
+			"data_type": "STRING",
+			"c_name": "receiving_dc_name",
+			"spark_val": "StringType"
+		},
+		"stream_code":{
+			"data_type": "STRING",
+			"c_name": "stream_code",
+			"spark_val": "StringType"
+		},	
+		"stream_name":{
+			"data_type": "STRING",
+			"c_name": "stream_name",
+			"spark_val": "StringType"
+		},
+		"volume":{
+			"data_type": "STRING",
+			"c_name": "volume",
+			"spark_val": "StringType"
+		},
+		"value":{
+			"data_type": "STRING",
+			"c_name": "value",
+			"spark_val": "StringType"
+		}
+	}
+}

@@ -1,0 +1,10 @@
+﻿CREATE TABLE [paycan_restricted_curated].[LYNX_VALIDATION1] (
+    [BATCH_ID]        INT           NOT NULL,
+    [FILE_NAME]       VARCHAR (255) NOT NULL,
+    [FILE_PRIMARY_ID] BIGINT        NOT NULL,
+    [BUSINESS_ID]     BIGINT        NULL,
+    [FLAG_NAME]       VARCHAR (255) NOT NULL,
+    [CREATETIME]      DATE          NULL,
+    PRIMARY KEY CLUSTERED ([BATCH_ID] ASC, [FILE_NAME] ASC, [FILE_PRIMARY_ID] ASC, [FLAG_NAME] ASC)
+);
+

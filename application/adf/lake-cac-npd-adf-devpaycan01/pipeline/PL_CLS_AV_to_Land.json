@@ -1,0 +1,177 @@
+{
+	"name": "PL_CLS_AV_to_Land",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get file list in AV",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@pipeline().parameters.prm_av_directory",
+								"type": "Expression"
+							},
+							"filename": "@null"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Move to land",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get file list in AV",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get file list in AV').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy the file from AV to land",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "FileServerReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_AntiVirus_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"directory": "@pipeline().parameters.prm_av_directory",
+										"filename": "@item().name"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@pipeline().parameters.prm_land_container",
+										"directory": "@pipeline().parameters.prm_land_directory",
+										"filename": "@item().name"
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete the file in AV",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Copy the file from AV to land",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_AntiVirus_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"directory": {
+											"value": "@pipeline().parameters.prm_av_directory",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory": {
+				"type": "string",
+				"defaultValue": "cls"
+			},
+			"prm_av_directory": {
+				"type": "string",
+				"defaultValue": "cls"
+			}
+		},
+		"folder": {
+			"name": "CLS/Dynamic"
+		},
+		"annotations": []
+	}
+}

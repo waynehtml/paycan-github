@@ -1,0 +1,104 @@
+{
+	"name": "PL_Lynx_UC_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "If raw_to_standard",
+				"description": "",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_raw_to_standard_uc, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_Raw_to_Standardized_UC",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Raw_to_Standardized_UC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If standard_to_curated",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "If raw_to_standard",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_standard_to_curated_uc, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_Standardized_to_Curated_UC",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Standardized_to_Curated_UC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			},
+			"prm_run_raw_to_standard_uc": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"prm_run_standard_to_curated_uc": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"folder": {
+			"name": "Lynx/UC"
+		},
+		"annotations": []
+	}
+}

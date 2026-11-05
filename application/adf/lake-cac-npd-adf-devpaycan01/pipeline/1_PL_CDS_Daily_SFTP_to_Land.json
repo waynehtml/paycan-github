@@ -1,0 +1,212 @@
+{
+	"name": "1_PL_CDS_Daily_SFTP_to_Land",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set source file name",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_source_file_name",
+					"value": {
+						"value": "@concat(\n    pipeline().parameters.pm_file_name,\n    formatDateTime(pipeline().parameters.pm_date, 'yyyyMMdd'),\n    '*.csv'\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Copy SFTP file to AV Scan",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set source file name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "SftpReadSettings",
+							"recursive": false,
+							"wildcardFolderPath": "@pipeline().globalParameters.gpm_cds_config.daily_sftp_folder",
+							"wildcardFileName": {
+								"value": "@variables('var_source_file_name')",
+								"type": "Expression"
+							},
+							"deleteFilesAfterCompletion": false,
+							"disableChunking": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "FileServerWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SFTP_CDS",
+						"type": "DatasetReference",
+						"parameters": {
+							"host": {
+								"value": "@pipeline().parameters.pm_sftp_host",
+								"type": "Expression"
+							},
+							"user_name": {
+								"value": "@pipeline().parameters.pm_sftp_user_name",
+								"type": "Expression"
+							},
+							"secret_key_vault": {
+								"value": "@pipeline().parameters.pm_sftp_secret_name",
+								"type": "Expression"
+							},
+							"sftp_folder": {
+								"value": "@pipeline().globalParameters.gpm_cds_config.daily_sftp_folder",
+								"type": "Expression"
+							},
+							"file_name": {
+								"value": "@variables('var_source_file_name')",
+								"type": "Expression"
+							},
+							"port": {
+								"value": "@pipeline().parameters.pm_sftp_port",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@pipeline().globalParameters.gpm_cds_config.av_path",
+								"type": "Expression"
+							},
+							"filename": "@concat(     pipeline().parameters.pm_file_name,     formatDateTime(pipeline().parameters.pm_date, 'yyyyMMdd'),     '.csv' )"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy from AV to Land",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy SFTP file to AV Scan",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": "@pipeline().globalParameters.gpm_cds_config.av_path",
+							"filename": "@concat(     pipeline().parameters.pm_file_name,     formatDateTime(pipeline().parameters.pm_date, 'yyyyMMdd'),     '.csv' )"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_landing",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(pipeline().globalParameters.gpm_cds_config.land_path, formatDateTime(pipeline().parameters.pm_date, 'yyyy-MM-dd'))",
+								"type": "Expression"
+							},
+							"filename": "@concat(     pipeline().parameters.pm_file_name,     formatDateTime(pipeline().parameters.pm_date, 'yyyyMMdd'),     '.csv' )"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"pm_date": {
+				"type": "string"
+			},
+			"pm_file_name": {
+				"type": "string"
+			},
+			"pm_sftp_host": {
+				"type": "string"
+			},
+			"pm_sftp_user_name": {
+				"type": "string"
+			},
+			"pm_sftp_secret_name": {
+				"type": "string"
+			},
+			"pm_sftp_port": {
+				"type": "int",
+				"defaultValue": 22
+			}
+		},
+		"variables": {
+			"var_source_file_name": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDS/Dynamic"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,214 @@
+{
+	"name": "PL_CLS_Load_All",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get file list in land",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@pipeline().parameters.prm_land_container",
+							"directory": "@pipeline().parameters.prm_land_directory",
+							"filename": "@null"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Exit failure if empty",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get file list in land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(length(activity('Get file list in land').output.childItems), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_CLS_force_fail_1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CLS_force_fail",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Not xlsx files",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Exit failure if empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get file list in land').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@not(endswith(item().name, 'xlsx'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Exit failure if exist not xlsx file",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Not xlsx files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('Not xlsx files').output.FilteredItemsCount, 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_CLS_force_fail_2",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CLS_force_fail",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "PL_CLS_Main",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Exit failure if exist not xlsx file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_CLS_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_av_directory": {
+							"value": "@pipeline().parameters.prm_av_directory",
+							"type": "Expression"
+						},
+						"prm_land_container": {
+							"value": "@pipeline().parameters.prm_land_container",
+							"type": "Expression"
+						},
+						"prm_land_directory": {
+							"value": "@pipeline().parameters.prm_land_directory",
+							"type": "Expression"
+						},
+						"prm_raw_container": {
+							"value": "@pipeline().parameters.prm_raw_container",
+							"type": "Expression"
+						},
+						"prm_raw_directory": {
+							"value": "@pipeline().parameters.prm_raw_directory",
+							"type": "Expression"
+						},
+						"prm_environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_av_directory": {
+				"type": "string",
+				"defaultValue": "cls"
+			},
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory": {
+				"type": "string",
+				"defaultValue": "cls"
+			},
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/cls_group"
+			}
+		},
+		"folder": {
+			"name": "CLS/Control"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,673 @@
+# Databricks notebook source
+# DBTITLE 1,Get Parameters
+# remove all widgets
+dbutils.widgets.removeAll()
+
+# Add widgets
+dbutils.widgets.text("environment", "")
+
+# Get parameters from widgets
+environment = dbutils.widgets.get("environment")
+
+# COMMAND ----------
+
+# DBTITLE 1,Common
+# MAGIC %run ../../../common/utils
+
+# COMMAND ----------
+
+unity_catalog_name = get_unity_catalog_name(dbutils.widgets.get("environment"))
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_participant_institution
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_participant_institution
+(
+BATCH_ID INTEGER,
+LYNX_PARTICIPANT_INSTITUTION_ID LONG,
+VALIDATION_STATUS INTEGER,
+INSTITUTION_NUMBER LONG,
+INSTITUTION_IRN STRING,
+INSTITUTION_NAME STRING,
+INSTITUTION_DESCRIPTION STRING,
+INSTITUTION_STATUS_CD STRING,
+PARTICIPANT_NUMBER LONG,
+PARTICIPANT_NAME STRING,
+PARTICIPANT_DESCRIPTION STRING,
+PARTICIAPNT_STATUS_CD STRING,
+CREDIT_IND STRING,
+MAX_CREDIT_AMOUNT DECIMAL(30,2),
+MIN_CREDIT_AMOUNT DECIMAL(30,2),
+MONETARY_IND STRING,
+ROLE_TYPE_CD STRING,
+BUSINESS_IDENT_CD STRING,
+CATEGORY_NO LONG,
+OFFICIAL_ADDR1 STRING,
+OFFICIAL_ADDR2 STRING,
+OFFICIAL_ADDR3 STRING,
+OFFICIAL_ADDR4 STRING,
+OFFICIAL_DESIGNATION STRING,
+OFFICIAL_POSTAL_CD STRING,
+LIQUIDITY_THRESHOLD_BAL DECIMAL(30,2),
+EFFECTIVE_TS TIMESTAMP,
+EXPIRE_TS TIMESTAMP,
+LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_payment
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_payment
+(
+BATCH_ID INTEGER,
+LYNX_PAYMENT_ID LONG,
+VALIDATION_STATUS INTEGER,
+PAYMENT_ID LONG,
+SYSTEM_REFERENCE STRING,
+CYCLE_DATE DATE,
+PAYER_INSTITUTION_NUMBER LONG,
+PAYER_INSTITUTION_IRN STRING,
+PAYER_INSTITUTION_NAME STRING,
+PAYER_INSTITUTION STRING,
+PAYER_PARTICIPANT_NUMBER LONG,
+PAYER_PARTICIPANT_BIC STRING,
+PAYER_PARTICIPANT_NAME STRING,
+PAYER_PARTICIPANT STRING,
+PAYER_REFERENCE STRING,
+SETTLEMENT_MECHANISM_CD STRING,
+RECEIVER_INSTITUTION_NUMBER LONG,
+RECEIVER_INSTITUTION_IRN STRING,
+RECEIVER_INSTITUTION_NAME STRING,
+RECEIVER_INSTITUTION STRING,
+RECEIVER_PARTICIPANT_NUMBER LONG,
+RECEIVER_PARTICIPANT_BIC STRING,
+RECEIVER_PARTICIPANT_NAME STRING,
+RECEIVER_PARTICIPANT STRING,
+SWIFT_MSG_TYPE_CD STRING,
+TRANSACTION_TYPE STRING,
+PCRN STRING,
+AMOUNT DECIMAL(30,2),
+GRIDLOCK_SETTLED_ID LONG,
+PRIORITY LONG,
+LAST_MODIFIED_TS TIMESTAMP,
+STATUS_TYPE_CD STRING,
+STATUS_CHANGE_TIME_TS TIMESTAMP,
+STATUS_REASON STRING,
+STATUS_MILLISECOND_DURATION LONG
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_net_send_schedule
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_net_send_schedule
+(
+BATCH_ID INTEGER,
+LYNX_NET_SEND_SCHEDULE_ID LONG,
+VALIDATION_STATUS INTEGER,
+NET_SEND_ID LONG,
+ACTIVE_DATE DATE,
+DELETE_DATE DATE,
+CHANGE_TIME TIMESTAMP,
+INSTITUTION_NUMBER LONG,
+INSTITUTION_IRN STRING,
+INSTITUTION_NAME STRING,
+INSTITUTION STRING,
+PARTICIPANT_NUMBER LONG,
+PARTICIPANT_BIC STRING,
+PARTICIPANT_NAME STRING,
+PARTICIPANT STRING,
+CONTRA_INSTITUTION_NUMBER LONG,
+CONTRA_INSTITUTION_IRN STRING,
+CONTRA_INSTITUTION_NAME STRING,
+CONTRA_INSTITUTION STRING,
+CONTRA_PARTICIPANT_NUMBER LONG,
+CONTRA_PARTICIPANT_BIC STRING,
+CONTRA_PARTICIPANT_NAME STRING,
+CONTRA_PARTICIPANT STRING,
+SETTLEMENT_MECHANISM_CD STRING,
+DAY_NUMBER LONG,
+FIXED_TIME STRING,
+EVENT_TRIGGER_CD STRING,
+EVENT_TRIGGER_DESCRIPTION STRING,
+AMOUNT DECIMAL(30,2),
+LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_operating_schedule
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_operating_schedule (
+    BATCH_ID INTEGER,
+    LYNX_OPERATING_SCHEDULE_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    WINDOW_LOG_ID LONG,
+    CYCLE_DATE DATE,
+    EVENT STRING,
+    START_TS TIMESTAMP,
+    END_TS TIMESTAMP,
+    LAST_MODIFIED_TS TIMESTAMP,
+    DURATION LONG
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_operational_status
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_operational_status (
+    BATCH_ID INTEGER,
+    LYNX_OPERATIONAL_STATUS_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    STATUS_LOG_ID LONG,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    STATUS_TYPE_CD STRING,
+    EFFECTIVE_TS TIMESTAMP,
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_net_send_override
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_net_send_override (
+    BATCH_ID INTEGER,
+    LYNX_NET_SEND_OVERRIDE_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    NET_SEND_OVERRIDE_ID LONG,
+    CYCLE_DATE DATE,
+    ACTIVE_DATE DATE,
+    DELETE_DATE DATE,
+    CHANGE_TIME TIMESTAMP,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    CONTRA_INSTITUTION_NUMBER LONG,
+    CONTRA_INSTITUTION_IRN STRING,
+    CONTRA_INSTITUTION_NAME STRING,
+    CONTRA_INSTITUTION STRING,
+    CONTRA_PARTICIPANT_NUMBER LONG,
+    CONTRA_PARTICIPANT_BIC STRING,
+    CONTRA_PARTICIPANT_NAME STRING,
+    CONTRA_PARTICIPANT STRING,
+    SETTLEMENT_MECHANISM_CD STRING,
+    DAY_NUMBER LONG,
+    FIXED_TIME STRING,
+    EVENT_TRIGGER_CD STRING,
+    EVENT_TRIGGER_DESCRIPTION STRING,
+    AMOUNT DECIMAL(30,2),
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_net_send_limit
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_net_send_limit (
+    BATCH_ID INTEGER,
+    LYNX_NET_SEND_LIMIT_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    NET_SEND_LIMIT_ID LONG,
+    CYCLE_DATE DATE,
+    SYSTEM_REFERENCE STRING,
+    ORIGINATOR_REFERENCE STRING,
+    REGISTERED_TS TIMESTAMP,
+    FINAL_TS TIMESTAMP,
+    EFFECTIVE_TS TIMESTAMP,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    CONTRA_INSTITUTION_NUMBER LONG,
+    CONTRA_INSTITUTION_IRN STRING,
+    CONTRA_INSTITUTION_NAME STRING,
+    CONTRA_INSTITUTION STRING,
+    CONTRA_PARTICIPANT_NUMBER LONG,
+    CONTRA_PARTICIPANT_BIC STRING,
+    CONTRA_PARTICIPANT_NAME STRING,
+    CONTRA_PARTICIPANT STRING,
+    SETTLEMENT_MECHANISM_CD STRING,
+    EVENT_TRIGGER_CD STRING,
+    EVENT_TRIGGER_DESC STRING,
+    LIMIT_AMOUNT DECIMAL(30,2),
+    FIXED_TIME STRING,
+    FINALIZED_BY STRING,
+    STATUS_TYPE_CD STRING,
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_liquidity_threshold
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_liquidity_threshold (
+    BATCH_ID INTEGER,
+    LYNX_LIQUIDITY_THRESHOLD_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    CREATE_DATE DATE,
+    ACTIVE_DATE DATE,
+    DELETE_DATE DATE,
+    CHANGE_TS TIMESTAMP,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    SETTLEMENT_MECHANISM_CD STRING,
+    THRESHOLD_AMOUNT DECIMAL(30,2),
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_liquidity_position
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_liquidity_position (
+    BATCH_ID INTEGER,
+    LYNX_LIQUIDITY_POSITION_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    SETTLEMENT_MECHANISM_CD STRING,
+    SENT_AMOUNT DECIMAL(30,2),
+    RECEIVED_AMOUNT DECIMAL(30,2),
+    LIQUIDITY_POSITION DECIMAL(30,2),
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_gridlock (
+    BATCH_ID INTEGER,
+    LYNX_GRIDLOCK_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    GRIDLOCK_PARTICIPANT_ID LONG,
+    GRIDLOCK_BATCH_ID LONG,
+    CYCLE_DATE DATE,
+    START_TS TIMESTAMP,
+    END_TS TIMESTAMP,
+    TRIGGER STRING,
+    GRIDLOCK_INTERVAL LONG,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    BEGIN_QUEUE_VALUE DECIMAL(30,2),
+    END_QUEUE_VALUE DECIMAL(30,2),
+    BEGIN_QUEUE_VOLUME LONG,
+    END_QUEUE_VOLUME LONG,
+    LAST_MODIFIED_TS TIMESTAMP,
+    MATCHED_WITH_PAY STRING
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_credit_position
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_credit_position (
+    BATCH_ID INTEGER,
+    LYNX_CREDIT_POSITION_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    CREDIT_ENTRY_ID LONG,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    EVENT_TS TIMESTAMP,
+    TRIGGER_CD STRING,
+    TRIGGER_NAME STRING,
+    TOTAL_LIMIT DECIMAL(30,2),
+    TOTAL_AVAILABLE DECIMAL(30,2),
+    ENTRY_TYPE_CD STRING,
+    ENTRY_TYPE_NAME STRING,
+    ENTRY_AMOUNT DECIMAL(30,2),
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_credit_activity
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_credit_activity (
+    BATCH_ID INTEGER,
+    LYNX_CREDIT_ACTIVITY_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    CREDIT_ACTIVITY_ID LONG,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    SYSTEM_REFERENCE_CD STRING,
+    TOTAL_AMOUNT DECIMAL(30,2),
+    EARMARKED_AMOUNT DECIMAL(30,2),
+    EARMARKED_LOM STRING,
+    LAST_MODIFIED_TS TIMESTAMP,
+    STATUS_TYPE_CD STRING,
+    STATUS_CHANGE_TIME TIMESTAMP,
+    STATUS_REASON_CD STRING,
+    STATUS_TYPE_CATEGORY STRING
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_loan
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_loan (
+    BATCH_ID INTEGER,
+    LYNX_LOAN_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    LOAN_ENTRY_ID LONG,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    ACCOUNT_ID LONG,
+    ACCOUNT_NAME STRING,
+    SYSTEM_REFERENCE_CD STRING,
+    ENTRY_TYPE STRING,
+    AMOUNT DECIMAL(30,2),
+    ENTRY_TS TIMESTAMP,
+    ACCOUNT_BALANCE DECIMAL(30,2),
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_lom_status
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_lom_status (
+    BATCH_ID INTEGER,
+    LYNX_LOM_STATUS_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    SETTLEMENT_MECHANISM_CD STRING,
+    STATUS_CD STRING,
+    EFFECTIVE_TS TIMESTAMP,
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_minum_balance
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_minum_balance (
+    BATCH_ID INTEGER,
+    LYNX_MINUM_BALANCE_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    SETTLEMENT_MECHANISM_CD STRING,
+    MINIMUM_AMOUNT DECIMAL(30,2),
+    MET_TS TIMESTAMP,
+    LAST_MODIFIED_TS TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_pause_payments
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_pause_payments (
+    BATCH_ID INTEGER,
+    LYNX_PAUSE_PAYMENTS_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    PAUSE_PAYMENTS_ID LONG,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    ORIGINATOR_REFERENCE STRING,
+    REGISTERED_TS TIMESTAMP,
+    EFFECTIVE_TS TIMESTAMP,
+    LAST_MODIFIED_TS TIMESTAMP,
+    CONTRA_INSTITUTION_ACTION STRING,
+    CONTRA_INSTITUTION_NUMBER LONG,
+    CONTRA_INSTITUTION_IRN STRING,
+    CONTRA_INSTITUTION_NAME STRING,
+    CONTRA_INSTITUTION STRING,
+    CONTRA_PARTICIPANT_NUMBER LONG,
+    CONTRA_PARTICIPANT_BIC STRING,
+    CONTRA_PARTICIPANT_NAME STRING,
+    CONTRA_PARTICIPANT STRING
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_transfer
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_transfer (
+    BATCH_ID INTEGER,
+    LYNX_TRANSFER_ID LONG,
+    VALIDATION_STATUS INTEGER,
+    TRANSFER_ID LONG,
+    SYSTEM_REFERENCE STRING,
+    PAYER_REFERENCE STRING,
+    CYCLE_DATE DATE,
+    INSTITUTION_NUMBER LONG,
+    INSTITUTION_IRN STRING,
+    INSTITUTION_NAME STRING,
+    INSTITUTION STRING,
+    PARTICIPANT_NUMBER LONG,
+    PARTICIPANT_BIC STRING,
+    PARTICIPANT_NAME STRING,
+    PARTICIPANT STRING,
+    FROM_ACCOUNT_ID LONG,
+    FROM_ACCOUNT_BBAN STRING,
+    FROM_ACCOUNT_NAME STRING,
+    FROM_SETTLE_MECH_CD STRING,
+    TO_ACCOUNT_ID LONG,
+    TO_ACCOUNT_BBAN STRING,
+    TO_ACCOUNT_NAME STRING,
+    TO_SETTLE_MECH_CD STRING,
+    TRANSACTION_TYPE STRING,
+    AMOUNT DECIMAL(30,2),
+    LAST_MODIFIED_TS TIMESTAMP,
+    STATUS_TYPE_CD STRING,
+    STATUS_CHANGE_TS TIMESTAMP,
+    STATUS_REASON STRING,
+    STATUS_MILLISECOND_DURATION LONG
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_validation
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_validation
+(
+BATCH_ID INTEGER,
+FILE_NAME STRING,
+FILE_PRIMARY_ID LONG,
+BUSINESS_ID LONG,
+FLAG_NAME STRING,
+CREATETIME TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_payment_summary
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_payment_summary (
+    BATCH_ID INTEGER,
+    PAYMENT_ID LONG,
+    PAYER_REFERENCE STRING,
+    SYSTEM_REFERENCE STRING,
+    CYCLE_DATE DATE,
+    PAYER_INSTITUTION STRING,
+    PAYER_PARTICIPANT STRING,
+    SETTLEMENT_MECHANISM_CD STRING,
+    RECEIVER_INSTITUTION STRING,
+    RECEIVER_PARTICIPANT STRING,
+    SWIFT_MSG_TYPE_CD STRING,
+    TRANSACTION_TYPE STRING,
+    AMOUNT DECIMAL(30,2),
+    GRIDLOCK_SETTLED_ID LONG,
+    PRIORITY LONG,
+    REGISTERED INTEGER,
+    SETTLED INTEGER,
+    QUEUED INTEGER,
+    DIARISED INTEGER,
+    REMOVED INTEGER,
+    REPRIORITISE INTEGER,
+    DISCARDED INTEGER,
+    RESEQUENCED INTEGER,
+    INSUFFUNDS INTEGER,
+    REGISTERED_TIME TIMESTAMP,
+    SETTLED_TIME TIMESTAMP,
+    QUEUED_TIME TIMESTAMP,
+    DIARISED_TIME TIMESTAMP,
+    REMOVED_TIME TIMESTAMP,
+    REPRIORITISE_TIME TIMESTAMP,
+    DISCARDED_TIME TIMESTAMP,
+    RESEQUENCED_TIME TIMESTAMP,
+    INSUFFUNDS_TIME TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_transfer_summary
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_transfer_summary (
+    BATCH_ID INTEGER,
+    TRANSFER_ID LONG,
+    PAYER_REFERENCE STRING,
+    CYCLE_DATE DATE,
+    INSTITUTION STRING,
+    PARTICIPANT STRING,
+    FROM_ACCOUNT_BBAN STRING,
+    FROM_ACCOUNT_NAME STRING,
+    FROM_SETTLE_MECH_CD STRING,
+    TO_ACCOUNT_BBAN STRING,
+    TO_ACCOUNT_NAME STRING,
+    TO_SETTLE_MECH_CD STRING,
+    TRANSACTION_TYPE STRING,
+    AMOUNT DECIMAL(30,2),
+    REGISTERED INTEGER,
+    SETTLED INTEGER,
+    REGISTERED_TIME TIMESTAMP,
+    SETTLED_TIME TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")
+
+# COMMAND ----------
+
+# DBTITLE 1,lynx_credit_activity_summary
+spark.sql(f"""
+CREATE OR REPLACE TABLE {unity_catalog_name}.curated_db.lynx_credit_activity_summary (
+    BATCH_ID INTEGER,
+    CREDIT_ACTIVITY_ID LONG,
+    CYCLE_DATE DATE,
+    INSTITUTION STRING,
+    PARTICIPANT STRING,
+    TOTAL_AMOUNT DECIMAL(30,2),
+    EARMARKED_AMOUNT DECIMAL(30,2),
+    EARMARKED_LOM STRING,
+    REGISTERED INTEGER,
+    PROCESSED INTEGER,
+    REGISTERED_TIME TIMESTAMP,
+    PROCESSED_TIME TIMESTAMP
+)
+USING DELTA TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true', 'delta.autoOptimize.autoCompact' = 'true', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5', 'delta.columnMapping.mode' = 'name');
+""")

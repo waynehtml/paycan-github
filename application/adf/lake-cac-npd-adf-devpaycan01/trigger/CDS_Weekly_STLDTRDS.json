@@ -1,0 +1,44 @@
+{
+	"name": "CDS_Weekly_STLDTRDS",
+	"properties": {
+		"description": "File key: STLDTRDS",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Main_CDS",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"pm_file_name": "STLDTRDS",
+					"pm_sftp_to_land": "1",
+					"pm_land_to_raw": "1",
+					"pm_raw_to_uc": "1",
+					"pm_load_type_uc": "daily",
+					"pm_file_validation": "1"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2026-07-07T19:05:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						7
+					],
+					"weekDays": [
+						"Wednesday"
+					]
+				}
+			}
+		}
+	}
+}

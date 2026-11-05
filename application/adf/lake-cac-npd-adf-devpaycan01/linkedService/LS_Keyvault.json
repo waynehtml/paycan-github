@@ -1,0 +1,10 @@
+{
+	"name": "LS_Keyvault",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://lake-cac-npd-kv-devpay01.vault.azure.net/"
+		}
+	}
+}

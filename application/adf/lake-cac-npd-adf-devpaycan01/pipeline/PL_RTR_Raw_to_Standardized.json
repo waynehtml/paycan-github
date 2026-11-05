@@ -1,0 +1,48 @@
+{
+	"name": "PL_RTR_Raw_to_Standardized",
+	"properties": {
+		"activities": [
+			{
+				"name": "RTR Ingestion to UC",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Run_Notebook_UC",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"notebook": "@pipeline().globalParameters.gpm_nb_rtr_std",
+						"parameter": {
+							"value": "@concat('{', '\"env\":\"', pipeline().globalParameters.gpm_environment,'\",', '\"container\":\"', pipeline().globalParameters.gpm_container_restricted, '\",', '\"storage\":\"', pipeline().globalParameters.gpm_storage,'\",', '\"file_date\":\"', pipeline().parameters.file_date, '\",', '\"dataset\":\"', pipeline().parameters.dataset, '\",', '\"load_type\":\"', pipeline().parameters.load_type, '\"', '}')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"file_date": {
+				"type": "string"
+			},
+			"dataset": {
+				"type": "string"
+			},
+			"load_type": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "RTR/Dynamic"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:28:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

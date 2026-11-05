@@ -1,0 +1,20 @@
+{
+	"name": "LS_ADSLG2",
+	"properties": {
+		"parameters": {
+			"storage": {
+				"type": "string",
+				"defaultValue": "lakecacnpdstdevland01"
+			}
+		},
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "@{concat('https://',linkedService().storage,'.dfs.core.windows.net/')}"
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

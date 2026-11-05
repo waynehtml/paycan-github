@@ -1,0 +1,79 @@
+{
+"project_name" : "CDCC",
+
+"sftp": {
+        "ingestion_info": [
+            {
+                "host": "198.235.29.5",
+                "port": 22,
+                "get": "/CDCC/AllRegulators/{delta_year}/",
+				"authentication": {
+                    "type": "SSH public key authentication",
+					"username": "BoCProdStats",
+                    "keyVault_key_file": "tmx-cdcc-sftp-rsa-key"
+                },
+                "gpg_decrypt": false,
+                "unzip": true,
+                "delete_after_download": false,
+                "retry_num": 30,
+                "retry_delay": 1800
+            }
+        ]
+    },
+
+"r_drive_file_location": "\\\\svm1\\home\\mfa\\PSD\\TMX\\Data\\CDCC\\scripts\\src",
+
+"av_scan_container": "avscan-paycan",
+"av_scan_folder":"cdcc/data/",
+"av_scan_folder_compressed":"cdcc/compressed",
+
+"land_scan_container": "land-paycan",
+"land_scan_folder": "cdcc/data",
+"land_scan_folder_compressed": "cdcc/compressed",
+"land_scan_main_folder": "cdcc",
+"land_scan_sub_folder": "data",
+
+"data_container": "restricted",
+"raw_folder": "raw/external/tmx/cdcc/data/CDCCStatistics{YYYYMMDD}",
+"raw_archive_folder": "raw/external/tmx/cdcc/archive{YYYYMMDD}",
+"notebook_raw_to_uc_cdcc_files": "/paycan/cdcc/10_raw/raw_to_uc_cdcc",
+"notebook_raw_decompress_file": "/paycan/cdcc/10_raw/decompress_raw_file",
+
+"std_schema_name": "standardized_db",
+"cur_schema_name": "curated_db",
+"der_schema_name": "derived_db",
+
+"table_list" : 
+	[
+		{
+			"tbl_tmx_cdcc_cm": "tbl_tmx_cdcc_cm" 
+		},
+		{
+			"tbl_tmx_cdcc_collateral": "tbl_tmx_cdcc_collateral"
+		},
+		{
+			"tbl_tmx_cdcc_date_dimension": "tbl_tmx_cdcc_date_dimension"
+		},
+		{
+			"tbl_tmx_cdcc_holiday_dimension": "tbl_tmx_cdcc_holiday_dimension"
+		},
+		{
+			"tbl_tmx_cdcc_liquidity_data": "tbl_tmx_cdcc_liquidity_data" 
+		},
+		{
+			"tbl_tmx_cdcc_liquidity_report": "tbl_tmx_cdcc_liquidity_report"
+		},
+		{
+			"tbl_tmx_cdcc_margins": "tbl_tmx_cdcc_margins"
+		},
+		{
+			"tbl_tmx_cdcc_members": "tbl_tmx_cdcc_members"
+		},
+		{
+			"tbl_tmx_cdcc_positions": "tbl_tmx_cdcc_positions"
+		},
+		{
+			"tbl_tmx_cdcc_vm": "tbl_tmx_cdcc_vm"
+		}
+	]
+}

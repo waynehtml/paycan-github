@@ -1,0 +1,344 @@
+{
+	"name": "PL_RTR_Control_Dataflow",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run Raw to Standard",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run File Validation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_raw_to_standard,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Raw to Standardized",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_RTR_Raw_to_Standardized",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"file_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"dataset": {
+										"value": "@pipeline().parameters.prm_uc_dataset",
+										"type": "Expression"
+									},
+									"load_type": {
+										"value": "@pipeline().parameters.prm_uc_load_type",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run Extraction from GCS to Land",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_gcs_to_land,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Extraction from GCS",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_RTR_GCS_to_AV",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_external_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_gcp,null), pipeline().globalParameters.gpm_container_gcp, pipeline().parameters.prm_container_gcp)",
+										"type": "Expression"
+									},
+									"prm_external_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_gcp,null),pipeline().globalParameters.gpm_directory_gcp, pipeline().parameters.prm_directory_gcp)",
+										"type": "Expression"
+									},
+									"prm_landing_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_landing,null), pipeline().globalParameters.gpm_directory_landing, pipeline().parameters.prm_directory_landing)",
+										"type": "Expression"
+									},
+									"prm_config_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_config,null), pipeline().globalParameters.gpm_container_config, pipeline().parameters.prm_container_config)",
+										"type": "Expression"
+									},
+									"prm_config_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_config,null), pipeline().globalParameters.gpm_directory_config, pipeline().parameters.prm_directory_config)",
+										"type": "Expression"
+									},
+									"prm_filenames": {
+										"value": "@if(equals(pipeline().parameters.prm_config_file_ingestion,null), pipeline().globalParameters.gpm_config_file_ingestion, pipeline().parameters.prm_config_file_ingestion)",
+										"type": "Expression"
+									},
+									"prm_keyvault_url": {
+										"value": "@if(equals(pipeline().parameters.prm_keyvault_url,null), pipeline().globalParameters.gpm_keyvault_url, pipeline().parameters.prm_keyvault_url)",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "AV to Land",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Extraction from GCS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_RTR_AV_to_Land",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_land_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_landing,null),pipeline().globalParameters.gpm_container_landing, pipeline().parameters.prm_container_landing)",
+										"type": "Expression"
+									},
+									"prm_land_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_landing,null),pipeline().globalParameters.gpm_directory_landing, pipeline().parameters.prm_directory_landing)",
+										"type": "Expression"
+									},
+									"prm_av_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_antivirus,null),pipeline().globalParameters.gpm_directory_antivirus, pipeline().parameters.prm_directory_antivirus)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run Land to Raw",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run Extraction from GCS to Land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_land_to_raw,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Landing to Raw",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_RTR_Land_to_Raw",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"prm_landing_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_landing,null), pipeline().globalParameters.gpm_container_landing, pipeline().parameters.prm_container_landing)",
+										"type": "Expression"
+									},
+									"prm_landing_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_landing,null), pipeline().globalParameters.gpm_directory_landing, pipeline().parameters.prm_directory_landing)",
+										"type": "Expression"
+									},
+									"prm_raw_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_restricted,null), pipeline().globalParameters.gpm_container_restricted, pipeline().parameters.prm_container_restricted)",
+										"type": "Expression"
+									},
+									"prm_raw_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_raw,null), pipeline().globalParameters.gpm_directory_raw, pipeline().parameters.prm_directory_raw)",
+										"type": "Expression"
+									},
+									"prm_config_container": {
+										"value": "@if(equals(pipeline().parameters.prm_container_config,null), pipeline().globalParameters.gpm_container_config, pipeline().parameters.prm_container_config)",
+										"type": "Expression"
+									},
+									"prm_config_directory": {
+										"value": "@if(equals(pipeline().parameters.prm_directory_config,null), pipeline().globalParameters.gpm_directory_config, pipeline().parameters.prm_directory_config)",
+										"type": "Expression"
+									},
+									"prm_filenames": {
+										"value": "@if(equals(pipeline().parameters.prm_config_file_ingestion,null), pipeline().globalParameters.gpm_config_file_ingestion, pipeline().parameters.prm_config_file_ingestion)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Run File Validation",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Run Land to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_run_file_validation,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "File Validation",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_RTR_File_Validation",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"file_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"dataset": {
+										"value": "@pipeline().parameters.prm_uc_dataset",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			},
+			"prm_container_restricted": {
+				"type": "string"
+			},
+			"prm_container_config": {
+				"type": "string"
+			},
+			"prm_container_gcp": {
+				"type": "string"
+			},
+			"prm_container_landing": {
+				"type": "string"
+			},
+			"prm_directory_config": {
+				"type": "string"
+			},
+			"prm_directory_gcp": {
+				"type": "string"
+			},
+			"prm_directory_landing": {
+				"type": "string"
+			},
+			"prm_directory_raw": {
+				"type": "string"
+			},
+			"prm_config_file_ingestion": {
+				"type": "string"
+			},
+			"prm_keyvault_url": {
+				"type": "string"
+			},
+			"prm_directory_antivirus": {
+				"type": "string"
+			},
+			"prm_run_raw_to_standard": {
+				"type": "int"
+			},
+			"prm_run_gcs_to_land": {
+				"type": "int"
+			},
+			"prm_run_land_to_raw": {
+				"type": "int"
+			},
+			"prm_uc_dataset": {
+				"type": "string"
+			},
+			"prm_uc_load_type": {
+				"type": "string"
+			},
+			"prm_run_file_validation": {
+				"type": "int"
+			}
+		},
+		"folder": {
+			"name": "RTR/Control"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-29T16:03:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

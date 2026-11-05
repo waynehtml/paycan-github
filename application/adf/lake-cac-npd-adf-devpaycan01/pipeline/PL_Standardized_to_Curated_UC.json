@@ -1,0 +1,231 @@
+{
+	"name": "PL_Standardized_to_Curated_UC",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"description": "The reason why the for-each loop is sequential is that the notebooks are writing to the same validation file.",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup FileNames",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup FileNames').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Validate and move to Curated",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "/paycan/lynx_uc/30_curated/1_curate_main",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"cycle_date": {
+										"value": "@replace(pipeline().parameters.prm_date,'-','')",
+										"type": "Expression"
+									},
+									"file_name": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"environment": {
+										"value": "@pipeline().globalParameters.gpm_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Databricks_LS_UC",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "credit_activity_summary",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "/paycan/lynx_uc/30_curated/credit_activity_summary",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "payment_summary",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "/paycan/lynx_uc/30_curated/payment_summary",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "transfer_summary",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "/paycan/lynx_uc/30_curated/transfer_summary",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Lookup FileNames",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "config-paycan",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "lynx",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "files_ingestion.json",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Lynx/UC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:29:59Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

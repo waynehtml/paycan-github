@@ -1,0 +1,49 @@
+{
+	"name": "Recurring Daily",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Control_Main",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"prm_date": "yyyy-MM-dd",
+					"prm_container_config": "config-paycan",
+					"prm_filenames": "holidays_adf.json",
+					"prm_run_extract_from_GCS": 1,
+					"prm_run_AV_to_land": 1,
+					"prm_run_land_to_raw": 1,
+					"prm_run_raw_to_standard": 1,
+					"prm_run_standard_to_curated": 1
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2021-08-31T07:00:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						5
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,230 @@
+{
+	"name": "PL_Land_to_Raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delete Files in Landing",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_landing_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_landing_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_config_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_filenames",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup1').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Move Data to Raw Zone",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_landing_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_landing_directory,'/',pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_raw_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_raw_directory,'/',pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			},
+			"prm_landing_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_landing_directory": {
+				"type": "string",
+				"defaultValue": "lynx"
+			},
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/payments_canada/lynx"
+			},
+			"prm_config_container": {
+				"type": "string",
+				"defaultValue": "config-paycan"
+			},
+			"prm_config_directory": {
+				"type": "string",
+				"defaultValue": "lynx"
+			},
+			"prm_filenames": {
+				"type": "string",
+				"defaultValue": "files_ingestion.json"
+			}
+		},
+		"folder": {
+			"name": "Lynx/Dynamic"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:28:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

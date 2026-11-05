@@ -1,0 +1,7 @@
+{
+	"name": "sqlServer01",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/1de5fd2d-2313-461a-acc4-07cdc509cdf4/resourceGroups/lake-cac-npd-rg-devplatform/providers/Microsoft.Sql/servers/lake-cac-npd-sql-dev01",
+		"groupId": "sqlServer"
+	}
+}

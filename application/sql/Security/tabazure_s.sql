@@ -1,0 +1,2 @@
+﻿CREATE USER [tabazure_s] WITHOUT LOGIN;
+

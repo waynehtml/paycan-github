@@ -1,0 +1,427 @@
+{
+  "catalog": [
+    {
+      "name": "_crypto_cat"
+    }
+  ],
+  "group": [
+    {
+      "name": "lake_dataopen_rusr",
+      "type": "legacy"
+    },
+    {
+      "name": "lake_chainanaldata_rusr",
+      "type": "legacy"
+    }
+  ],
+  "permissions": [
+    {
+      "name": "standardized_db.tbl_kaiko_exchange",
+      "grant": [
+        "lake_dataopen_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_kaiko_trade",
+      "grant": [
+        "lake_dataopen_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_kaiko_orderbook",
+      "grant": [
+        "lake_dataopen_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_active_entities",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_active_entities_monthly",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_active_entities_weekly",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_age",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_average_age",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_average_cost",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_average_gain",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_average_liquidity",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_average_wealth",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_block_stats",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_category_balance",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_country_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_destination_of_new_assets",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_exchange_change_in_balance",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_exchange_counterparties",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_exchange_deposits",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_exchange_inflows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_exchange_outflows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_exchange_withdrawals",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_fee_stats",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_fees_by_category",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_free_float",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_gain",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_illicit_balances",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_illicit_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_illicit_placement",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_inter_category_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_inter_service_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_liquidity",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_market_cap",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_mining_pool_source_of_assets",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_minter_balances",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_net_new_entities",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_new_addresses_by_category",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_price",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_price_monthly",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_price_weekly",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_properties",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_regional_category_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_regional_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_self_hosted_category_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_self_hosted_service_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_balance",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_counterparties",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_deposits",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_inflows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_outflows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_properties",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_transfers_by_size",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_transfers_by_time",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_service_withdrawals",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_supply",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_thermo_cap",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_total_flows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_total_flows_monthly",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_total_flows_weekly",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_trade_intensity",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_transfer_stats",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_transfers_by_category",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_wealth",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_wealth_concentration",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_whale_inflows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_whale_outflows",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_whale_properties",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    },
+    {
+      "name": "standardized_db.tbl_chainanalysis_blockchain_whale_transfers_by_size",
+      "grant": [
+        "lake_chainanaldata_rusr"
+      ]
+    }
+  ]
+}

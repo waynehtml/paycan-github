@@ -1,0 +1,54 @@
+trigger:
+  branches:
+    include:
+      - staging
+  paths:
+    include:
+      - application/databricks/*
+
+resources:
+  repositories:
+    - repository: templates                     # Reference shared DevOps repo
+      type: git
+      name: lake-devops/lake-devops
+      ref: refs/heads/main
+
+pool:
+  name:  dops-prdagntpl01
+
+variables:
+- template: ../application/databricks/pipeline-configs/cac-stg-nonuc.yaml
+
+extends:
+  template: pipelines/extends.yaml@templates
+  parameters:
+    deployStages:
+    - stage: archive_notebooks
+      displayName: Archive Notebooks
+      jobs:
+      - job: archive_notebooks
+        workspace:
+          clean: all
+        displayName: Archive Databricks Notebooks as Artifact
+        steps:
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(System.DefaultWorkingDirectory)/$(dbx_stg_repo_notebook_location)'
+              ArtifactName: 'databricks_notebooks'
+              publishLocation: 'Container'
+
+    - stage: upload_folder_stg
+      displayName: Upload to Databricks Staging
+      dependsOn: archive_notebooks
+      jobs:
+      - template: databricks/upload_folder.yaml@templates
+        parameters:
+          service_connection: $(dbx_stg_service_connection)
+          workspace_url: $(dbx_stg_workspace_url)
+          project_path: $(dbx_stg_project_path)
+          destination_path: $(dbx_stg_destination_path)
+
+
+
+
+      

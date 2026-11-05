@@ -1,0 +1,27 @@
+﻿CREATE TABLE [paycan_restricted_standardized].[LYNX_LOAN] (
+    [LYNX_LOAN_ID]        BIGINT          NOT NULL,
+    [BATCH_ID]            INT             NOT NULL,
+    [VALIDATION_STATUS]   BIT             NULL,
+    [LOAN_ENTRY_ID]       BIGINT          NULL,
+    [CYCLE_DATE]          DATE            NULL,
+    [INSTITUTION_NUMBER]  BIGINT          NULL,
+    [INSTITUTION_IRN]     VARCHAR (255)   NULL,
+    [INSTITUTION_NAME]    VARCHAR (255)   NULL,
+    [PARTICIPANT_NUMBER]  BIGINT          NULL,
+    [PARTICIPANT_BIC]     VARCHAR (255)   NULL,
+    [PARTICIPANT_NAME]    VARCHAR (255)   NULL,
+    [ACCOUNT_ID]          BIGINT          NULL,
+    [SYSTEM_REFERENCE_CD] VARCHAR (255)   NULL,
+    [INSTITUTION]         VARCHAR (100)   NULL,
+    [PARTICIPANT]         VARCHAR (100)   NULL,
+    [ACCOUNT_NAME]        VARCHAR (10)    NULL,
+    [ENTRY_TYPE]          VARCHAR (25)    NULL,
+    [AMOUNT]              DECIMAL (22, 2) NULL,
+    [ENTRY_TS]            DATETIME        NULL,
+    [ACCOUNT_BALANCE]     DECIMAL (30, 2) NULL,
+    [LAST_MODIFIED_TS]    DATETIME        NULL,
+    [ingestion_date]      DATETIME        NULL,
+    [batch_date]          VARCHAR (10)    NULL,
+    PRIMARY KEY CLUSTERED ([LYNX_LOAN_ID] ASC, [BATCH_ID] ASC)
+);
+

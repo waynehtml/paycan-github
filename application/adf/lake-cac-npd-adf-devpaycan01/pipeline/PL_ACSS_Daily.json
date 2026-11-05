@@ -1,0 +1,339 @@
+{
+	"name": "PL_ACSS_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_date",
+					"value": {
+						"value": "@if(or(equals(pipeline().parameters.prm_date,null),equals(pipeline().parameters.prm_date,'yyyy-MM-dd')),\nif(\n  or(\n     equals(dayofweek(adddays(utcnow(),-1)),0),\n     equals(dayofweek(adddays(utcnow(),-1)),6)\n   ),\n    if(equals(dayofweek(adddays(utcnow(),-1)),0),\n      formatDateTime(adddays(utcnow(),-3),'yyyy-MM-dd'),\n      formatDateTime(adddays(utcnow(),-2),'yyyy-MM-dd')\n    ),\n  formatDateTime(adddays(utcnow(),-1),'yyyy-MM-dd')\n),\n  formatDateTime(pipeline().parameters.prm_date,'yyyy-MM-dd')\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_container_config",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_directory_config",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_filenames",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup1').output.firstRow.holidays)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(item().date,variables('var_date'))",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Set variable1",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "var_isHoliday",
+											"value": {
+												"value": "@bool(1)",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If Date not Holiday",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(variables('var_isholiday'),bool(1)))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute PL_ACSS_Daily_Dataflow",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ACSS_Daily_Dataflow",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"prm_date": {
+										"value": "@variables('var_date')",
+										"type": "Expression"
+									},
+									"prm_container_restricted": {
+										"value": "@pipeline().parameters.prm_container_restricted",
+										"type": "Expression"
+									},
+									"prm_container_config": {
+										"value": "@pipeline().parameters.prm_container_config",
+										"type": "Expression"
+									},
+									"prm_container_gcp": {
+										"value": "@pipeline().globalParameters.gpm_container_gcp_acss",
+										"type": "Expression"
+									},
+									"prm_container_landing": {
+										"value": "@pipeline().parameters.prm_container_landing",
+										"type": "Expression"
+									},
+									"prm_storage": {
+										"value": "@pipeline().globalParameters.gpm_storage",
+										"type": "Expression"
+									},
+									"prm_storage_config": {
+										"value": "@pipeline().parameters.prm_directory_config",
+										"type": "Expression"
+									},
+									"prm_directory_config": {
+										"value": "@pipeline().parameters.prm_directory_config",
+										"type": "Expression"
+									},
+									"prm_directory_gcp": {
+										"value": "@pipeline().parameters.prm_directory_gcp",
+										"type": "Expression"
+									},
+									"prm_directory_landing": {
+										"value": "@pipeline().parameters.prm_directory_landing",
+										"type": "Expression"
+									},
+									"prm_directory_raw": {
+										"value": "@pipeline().parameters.prm_directory_raw",
+										"type": "Expression"
+									},
+									"prm_config_file_ingestion": {
+										"value": "@pipeline().parameters.prm_config_file_ingestion",
+										"type": "Expression"
+									},
+									"prm_config_file_holidays": {
+										"value": "@pipeline().parameters.prm_config_file_ingestion",
+										"type": "Expression"
+									},
+									"prm_keyvault_url": {
+										"value": "@pipeline().globalParameters.gpm_keyvault_url",
+										"type": "Expression"
+									},
+									"prm_directory_antivirus": {
+										"value": "@pipeline().parameters.prm_directory_antivirus",
+										"type": "Expression"
+									},
+									"prm_run_extract_from_GCS": {
+										"value": "@int(pipeline().parameters.prm_run_extract_from_GCS)",
+										"type": "Expression"
+									},
+									"prm_run_AV_to_land": {
+										"value": "@int(pipeline().parameters.prm_run_AV_to_land)",
+										"type": "Expression"
+									},
+									"prm_run_land_to_raw": {
+										"value": "@int(pipeline().parameters.prm_run_land_to_raw)",
+										"type": "Expression"
+									},
+									"prm_run_raw_to_standardize_daily": {
+										"value": "@int(pipeline().parameters.prm_run_raw_to_standardize_daily)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			},
+			"prm_container_restricted": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_container_config": {
+				"type": "string",
+				"defaultValue": "config-paycan"
+			},
+			"prm_container_gcp": {
+				"type": "string",
+				"defaultValue": "acs-dev-general-boc-acss-bucket"
+			},
+			"prm_container_landing": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_storage": {
+				"type": "string"
+			},
+			"prm_storage_config": {
+				"type": "string"
+			},
+			"prm_directory_config": {
+				"type": "string",
+				"defaultValue": "acss"
+			},
+			"prm_directory_gcp": {
+				"type": "string",
+				"defaultValue": "daily"
+			},
+			"prm_directory_landing": {
+				"type": "string",
+				"defaultValue": "acss/intraday"
+			},
+			"prm_directory_raw": {
+				"type": "string",
+				"defaultValue": "raw/external/payments_canada/acss/intraday"
+			},
+			"prm_config_file_ingestion": {
+				"type": "string",
+				"defaultValue": "acss_files_ingestion_intraday.json"
+			},
+			"prm_config_file_holidays": {
+				"type": "string"
+			},
+			"prm_config_file_tables_publish": {
+				"type": "string"
+			},
+			"prm_keyvault_url": {
+				"type": "string",
+				"defaultValue": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid/?api-version=7.0"
+			},
+			"prm_directory_antivirus": {
+				"type": "string",
+				"defaultValue": "acss/intraday"
+			},
+			"prm_filenames": {
+				"type": "string",
+				"defaultValue": "holidays_adf.json"
+			},
+			"prm_run_extract_from_GCS": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_AV_to_land": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_land_to_raw": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_raw_to_standardize_daily": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"var_date": {
+				"type": "String"
+			},
+			"var_isHoliday": {
+				"type": "Boolean",
+				"defaultValue": false
+			}
+		},
+		"folder": {
+			"name": "ACSS/Control"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-29T16:03:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

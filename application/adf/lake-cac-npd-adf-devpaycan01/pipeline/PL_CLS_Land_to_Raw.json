@@ -1,0 +1,182 @@
+{
+	"name": "PL_CLS_Land_to_Raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get file list in land",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "@pipeline().parameters.prm_land_container",
+							"directory": "@pipeline().parameters.prm_land_directory",
+							"filename": "@null"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Move to Raw working folder",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get file list in land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get file list in land').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy the xlsx file to working folder",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@pipeline().parameters.prm_land_directory",
+											"type": "Expression"
+										},
+										"filename": "@item().name"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@pipeline().parameters.prm_raw_container",
+										"directory": "@concat(pipeline().parameters.prm_raw_directory,'/working')",
+										"filename": "@item().name"
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete the file in land",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Copy the xlsx file to working folder",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "@pipeline().parameters.prm_land_container",
+										"directory": "@pipeline().parameters.prm_land_directory",
+										"filename": "@item().name"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory": {
+				"type": "string",
+				"defaultValue": "cls"
+			},
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/cls_group"
+			}
+		},
+		"folder": {
+			"name": "CLS/Dynamic"
+		},
+		"annotations": []
+	}
+}

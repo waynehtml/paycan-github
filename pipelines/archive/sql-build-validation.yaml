@@ -1,0 +1,26 @@
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - application/sql/*
+
+resources:
+  repositories:
+    - repository: templates                     # Reference shared DevOps repo
+      type: git
+      name: lake-devops/lake-devops
+      ref: refs/heads/main
+
+pool:
+  name:  dops-prdagntpl01
+
+extends:
+  template: pipelines/extends.yaml@templates
+  parameters:
+    buildJobs:
+    - template: pipelines/sql/build_artifact.yaml@templates
+      parameters:
+        project_name: 'ContinuousDeploymentTemplate'
+        artifact_name: 'dacpacs'

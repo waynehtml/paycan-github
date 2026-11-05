@@ -1,0 +1,301 @@
+{
+	"name": "PL_ACSS_Raw_to_Standardized",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup Filenames for Validation').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Standardized Zone",
+							"description": "Read data, do transformations and write the new data into standardized zone. ",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "@pipeline().parameters.prm_notebook_validate_move_to_standardized",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"cycle_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"file": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"container": {
+										"value": "@pipeline().parameters.prm_restricted_container",
+										"type": "Expression"
+									},
+									"storage_name": {
+										"value": "@pipeline().parameters.prm_storage",
+										"type": "Expression"
+									},
+									"raw_path": {
+										"value": "@pipeline().parameters.prm_directory_raw",
+										"type": "Expression"
+									},
+									"stn_path": {
+										"value": "@pipeline().parameters.prm_directory_std",
+										"type": "Expression"
+									},
+									"env": {
+										"value": "@pipeline().globalParameters.gpm_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Databricks_LS_UC",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup Filenames for Validation",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_config_path",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_config_file_ingestion",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach_Validate_File",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Filenames for Validation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup Filenames for Validation').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "validation",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "@pipeline().parameters.prm_notebook_file_validation",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"container": {
+										"value": "@pipeline().parameters.prm_restricted_container",
+										"type": "Expression"
+									},
+									"storage_name": {
+										"value": "@pipeline().parameters.prm_storage",
+										"type": "Expression"
+									},
+									"file_path": {
+										"value": "@pipeline().parameters.prm_directory_raw",
+										"type": "Expression"
+									},
+									"cycle_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"file": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
+									"env": {
+										"value": "@pipeline().globalParameters.gpm_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Databricks_LS_UC",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup Config",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ForEach_Validate_File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_config_path",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_config_file_standard",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2021-12-20"
+			},
+			"prm_restricted_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_directory_raw": {
+				"type": "string",
+				"defaultValue": "raw/external/payments_canada/acss_usbe/weekly"
+			},
+			"prm_config_file_standard": {
+				"type": "string",
+				"defaultValue": "acss_files_standard.json"
+			},
+			"prm_storage": {
+				"type": "string",
+				"defaultValue": "lakecacnpdstdev01"
+			},
+			"prm_config_container": {
+				"type": "string",
+				"defaultValue": "config-paycan"
+			},
+			"prm_config_path": {
+				"type": "string",
+				"defaultValue": "acss"
+			},
+			"prm_directory_std": {
+				"type": "string",
+				"defaultValue": "standardized/external/payments_canada/acss_usbe/weekly"
+			},
+			"prm_config_file_ingestion": {
+				"type": "string",
+				"defaultValue": "acss_files_ingestion.json"
+			},
+			"prm_notebook_file_validation": {
+				"type": "string",
+				"defaultValue": "/paycan/acss/file_validation"
+			},
+			"prm_notebook_validate_move_to_standardized": {
+				"type": "string",
+				"defaultValue": "/paycan/acss/raw_to_standardized"
+			},
+			"prm_config_storage": {
+				"type": "string",
+				"defaultValue": "lakecanpdstdevland01"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": []
+	}
+}

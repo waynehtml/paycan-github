@@ -1,0 +1,209 @@
+{
+	"name": "lake-cac-npd-adf-devpaycan01",
+	"properties": {
+		"globalParameters": {
+			"gpm_container_restricted": {
+				"type": "string",
+				"value": "restricted"
+			},
+			"gpm_container_config": {
+				"type": "string",
+				"value": "config-paycan"
+			},
+			"gpm_container_gcp": {
+				"type": "string",
+				"value": "acs-test-general-boc-lynx-bucket"
+			},
+			"gpm_container_landing": {
+				"type": "string",
+				"value": "land-paycan"
+			},
+			"gpm_storage": {
+				"type": "string",
+				"value": "lakecacnpdstdev01"
+			},
+			"gpm_storage_config": {
+				"type": "string",
+				"value": "lakecacnpdstdevland01"
+			},
+			"gpm_directory_config": {
+				"type": "string",
+				"value": "lynx"
+			},
+			"gpm_directory_gcp": {
+				"type": "string",
+				"value": "daily"
+			},
+			"gpm_directory_landing": {
+				"type": "string",
+				"value": "lynx"
+			},
+			"gpm_directory_raw": {
+				"type": "string",
+				"value": "raw/external/payments_canada/lynx"
+			},
+			"gpm_directory_standard": {
+				"type": "string",
+				"value": "standardized/external/payments_canada/lynx"
+			},
+			"gpm_directory_curated": {
+				"type": "string",
+				"value": "curated/paycan/lynx"
+			},
+			"gpm_config_file_ingestion": {
+				"type": "string",
+				"value": "files_ingestion.json"
+			},
+			"gpm_config_file_standard": {
+				"type": "string",
+				"value": "files_standard.json"
+			},
+			"gpm_config_file_holidays": {
+				"type": "string",
+				"value": "holidays.json"
+			},
+			"gpm_config_file_tables_publish": {
+				"type": "string",
+				"value": "tables_publish.json"
+			},
+			"gpm_keyvault_url": {
+				"type": "string",
+				"value": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid/?api-version=7.0"
+			},
+			"gpm_directory_antivirus": {
+				"type": "string",
+				"value": "lynx"
+			},
+			"gpm_container_gcp_acss": {
+				"type": "string",
+				"value": "acs-dev-general-boc-acss-bucket"
+			},
+			"gpm_directory_antivirus_acss_base": {
+				"type": "string",
+				"value": "acss_usbe"
+			},
+			"gpm_directory_landing_acss_base": {
+				"type": "string",
+				"value": "acss_usbe"
+			},
+			"gpm_directory_raw_acss": {
+				"type": "string",
+				"value": "raw/external/payments_canada/acss_usbe"
+			},
+			"gpm_keyvault_url_historical": {
+				"type": "string",
+				"value": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-accesskeyid-historical/?api-version=7.0"
+			},
+			"gpm_environment": {
+				"type": "string",
+				"value": "dev"
+			},
+			"gpm_subscrition": {
+				"type": "string",
+				"value": "1de5fd2d-2313-461a-acc4-07cdc509cdf4"
+			},
+			"gpm_cdcc_folder": {
+				"type": "string",
+				"value": "cdcc"
+			},
+			"gpm_cds_config": {
+				"type": "object",
+				"value": {
+					"sftp_host": "205.207.130.113",
+					"sftp_user_name": "fep01138",
+					"sftp_secret_name": "cds-oversight-sftp-key",
+					"sftp_folder": "outbound",
+					"daily_sftp_folder": "reports",
+					"av_path": "cds/data",
+					"land_path": "cds_oversight/",
+					"raw_container": "restricted",
+					"raw_path": "raw/external/tmx/cds_oversight/",
+					"file_validation_notebook": "/paycan/cds/10_file_validation",
+					"uc_notebook": "/paycan/cds/20_raw_to_standardized"
+				}
+			},
+			"gpm_container_gcp_rtr": {
+				"type": "string",
+				"value": "acs-dev-general-boc-rtr-bucket"
+			},
+			"gpm_directory_config_rtr": {
+				"type": "string",
+				"value": "rtr"
+			},
+			"gpm_directory_gcp_rtr_cs": {
+				"type": "string",
+				"value": "daily/cs"
+			},
+			"gpm_directory_landing_rtr_cs": {
+				"type": "string",
+				"value": "rtr/cs"
+			},
+			"gpm_directory_gcp_rtr_ex": {
+				"type": "string",
+				"value": "daily/exchange"
+			},
+			"gpm_directory_landing_rtr_ex": {
+				"type": "string",
+				"value": "rtr/exchange"
+			},
+			"gpm_directory_raw_rtr_ex": {
+				"type": "string",
+				"value": "raw/external/payments_canada/rtr/exchange"
+			},
+			"gpm_directory_raw_rtr_cs": {
+				"type": "string",
+				"value": "raw/external/payments_canada/rtr/cs"
+			},
+			"gpm_config_file_ingestion_rtr_ex": {
+				"type": "string",
+				"value": "files_ingestion_ex.json"
+			},
+			"gpm_config_file_ingestion_rtr_cs": {
+				"type": "string",
+				"value": "files_ingestion_cs.json"
+			},
+			"gpm_keyvault_url_rtr": {
+				"type": "string",
+				"value": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-rtr-accesskeyid/?api-version=7.0"
+			},
+			"gpm_directory_antivirus_rtr_ex": {
+				"type": "string",
+				"value": "rtr/exchange"
+			},
+			"gpm_directory_antivirus_rtr_cs": {
+				"type": "string",
+				"value": "rtr/cs"
+			},
+			"gpm_container_gcp_rtr_test": {
+				"type": "string",
+				"value": "acs-test-general-boc-rtr-bucket"
+			},
+			"gpm_keyvault_url_rtr_test": {
+				"type": "string",
+				"value": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-rtr-accesskeyid-test/?api-version=7.0"
+			},
+			"gpm_nb_rtr_std": {
+				"type": "string",
+				"value": "/paycan/rtr/20_standardized/rtr_main"
+			},
+			"gpm_nb_rtr_validation": {
+				"type": "string",
+				"value": "/paycan/rtr/20_standardized/rtr_raw_file_validation"
+			},
+			"gpm_keyvault_url_rtr_prod": {
+				"type": "string",
+				"value": "https://lake-cac-npd-kv-devpay01.vault.azure.net/secrets/st-paycangcs-rtr-accesskeyid-prod/?api-version=7.0"
+			},
+			"gpm_container_gcp_rtr_prod": {
+				"type": "string",
+				"value": "acs-prod-general-boc-rtr-bucket"
+			}
+		}
+	},
+	"location": "canadacentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "9a4924db-11dc-429b-aadf-2fed101a76d7",
+		"tenantId": "d5d43af4-5942-46a8-907b-711a17e948bd"
+	}
+}

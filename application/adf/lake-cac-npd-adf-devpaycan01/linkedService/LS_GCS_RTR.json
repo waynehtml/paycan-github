@@ -1,0 +1,28 @@
+{
+	"name": "LS_GCS_RTR",
+	"properties": {
+		"type": "GoogleCloudStorage",
+		"parameters": {
+			"AccessKeyId": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"typeProperties": {
+			"serviceUrl": "https://storage.googleapis.com",
+			"accessKeyId": "@{linkedService().AccessKeyId}",
+			"secretAccessKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_Keyvault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "st-paycangcs-rtr-accesskeysecret-prod"
+			}
+		},
+		"connectVia": {
+			"referenceName": "IR-SelfHost01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

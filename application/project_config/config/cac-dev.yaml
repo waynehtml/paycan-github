@@ -1,0 +1,10 @@
+variables:
+ - name: config_dev_container
+   value: config-paycan
+ - name: config_dev_source_folder
+   value: .
+ - name: config_dev_account_name
+   value: lakecacnpdstdevland01
+ - name: config_dev_service_connection
+   value: lake-dscn-bocqa01
+

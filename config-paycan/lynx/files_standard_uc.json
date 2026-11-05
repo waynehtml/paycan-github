@@ -1,0 +1,1731 @@
+{
+    "participant_institution": {
+        "idn_institution": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "inst_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "inst_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "inst_description": {
+            "data_type": "STRING",
+            "c_name": "institution_description",
+            "spark_val": "StringType"
+        },
+        "inst_status_code": {
+            "data_type": "STRING",
+            "c_name": "institution_status_cd",
+            "spark_val": "StringType"
+        },
+        "idn_participant": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_description": {
+            "data_type": "STRING",
+            "c_name": "participant_description",
+            "spark_val": "StringType"
+        },
+        "particiapnt_status_code": {
+            "data_type": "STRING",
+            "c_name": "particiapnt_status_cd",
+            "spark_val": "StringType"
+        },
+        "credit_ind": {
+            "data_type": "STRING",
+            "c_name": "credit_ind",
+            "spark_val": "StringType"
+        },
+        "max_credit_amt": {
+            "data_type": "STRING",
+            "c_name": "max_credit_amount",
+            "spark_val": "DecimalType"
+        },
+        "min_credit_amt": {
+            "data_type": "NUMERIC",
+            "c_name": "min_credit_amount",
+            "spark_val": "DecimalType"
+        },
+        "monetary_ind": {
+            "data_type": "STRING",
+            "c_name": "monetary_ind",
+            "spark_val": "StringType"
+        },
+        "role_type": {
+            "data_type": "STRING",
+            "c_name": "role_type_cd",
+            "spark_val": "StringType"
+        },
+        "bic": {
+            "data_type": "STRING",
+            "c_name": "business_ident_cd",
+            "spark_val": "StringType"
+        },
+        "category_no": {
+            "data_type": "INT64",
+            "c_name": "category_no",
+            "spark_val": "LongType"
+        },
+        "official_addr1": {
+            "data_type": "STRING",
+            "c_name": "official_addr1",
+            "spark_val": "StringType"
+        },
+        "official_addr2": {
+            "data_type": "STRING",
+            "c_name": "official_addr2",
+            "spark_val": "StringType"
+        },
+        "official_addr3": {
+            "data_type": "STRING",
+            "c_name": "official_addr3",
+            "spark_val": "StringType"
+        },
+        "official_addr4": {
+            "data_type": "STRING",
+            "c_name": "official_addr4",
+            "spark_val": "StringType"
+        },
+        "official_designation": {
+            "data_type": "STRING",
+            "c_name": "official_designation",
+            "spark_val": "StringType"
+        },
+        "official_postal_cde": {
+            "data_type": "STRING",
+            "c_name": "official_postal_cd",
+            "spark_val": "StringType"
+        },
+        "liquidity_threshold_bal": {
+            "data_type": "NUMERIC",
+            "c_name": "liquidity_threshold_bal",
+            "spark_val": "DecimalType"
+        },
+        "effective_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "effective_ts",
+            "spark_val": "TimestampType"
+        },
+        "expire_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "expire_ts",
+            "spark_val": "TimestampType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "payment": {
+        "payment_id": {
+            "data_type": "INT64",
+            "c_name": "payment_id",
+            "spark_val": "LongType"
+        },
+        "system_reference": {
+            "data_type": "STRING",
+            "c_name": "system_reference",
+            "spark_val": "StringType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "payer_institution_number": {
+            "data_type": "INT64",
+            "c_name": "payer_institution_number",
+            "spark_val": "LongType"
+        },
+        "payer_institution_irn": {
+            "data_type": "STRING",
+            "c_name": "payer_institution_irn",
+            "spark_val": "StringType"
+        },
+        "payer_institution_name": {
+            "data_type": "STRING",
+            "c_name": "payer_institution_name",
+            "spark_val": "StringType"
+        },
+        "payer_institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "payer_institution_short_name",
+            "spark_val": "StringType"
+        },
+        "payer_participant_number": {
+            "data_type": "INT64",
+            "c_name": "payer_participant_number",
+            "spark_val": "LongType"
+        },
+        "payer_participant_bic": {
+            "data_type": "STRING",
+            "c_name": "payer_participant_bic",
+            "spark_val": "StringType"
+        },
+        "payer_participant_name": {
+            "data_type": "STRING",
+            "c_name": "payer_participant_name",
+            "spark_val": "StringType"
+        },
+        "payer_participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "payer_participant_short_name",
+            "spark_val": "StringType"
+        },
+        "payer_reference": {
+            "data_type": "STRING",
+            "c_name": "payer_reference",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "receiver_institution_number": {
+            "data_type": "INT64",
+            "c_name": "receiver_institution_number",
+            "spark_val": "LongType"
+        },
+        "receiver_institution_irn": {
+            "data_type": "STRING",
+            "c_name": "receiver_institution_irn",
+            "spark_val": "StringType"
+        },
+        "receiver_institution_name": {
+            "data_type": "STRING",
+            "c_name": "receiver_institution_name",
+            "spark_val": "StringType"
+        },
+        "receiver_institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "receiver_institution_short_name",
+            "spark_val": "StringType"
+        },
+        "receiver_participant_number": {
+            "data_type": "INT64",
+            "c_name": "receiver_participant_number",
+            "spark_val": "LongType"
+        },
+        "receiver_participant_bic": {
+            "data_type": "STRING",
+            "c_name": "receiver_participant_bic",
+            "spark_val": "StringType"
+        },
+        "receiver_participant_name": {
+            "data_type": "STRING",
+            "c_name": "receiver_participant_name",
+            "spark_val": "StringType"
+        },
+        "receiver_participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "receiver_participant_short_name",
+            "spark_val": "StringType"
+        },
+        "swift_msg_type": {
+            "data_type": "STRING",
+            "c_name": "swift_msg_type_cd",
+            "spark_val": "StringType"
+        },
+        "transaction_type": {
+            "data_type": "STRING",
+            "c_name": "transaction_type",
+            "spark_val": "StringType"
+        },
+        "pcrn": {
+            "data_type": "STRING",
+            "c_name": "pcrn",
+            "spark_val": "StringType"
+        },
+        "amount": {
+            "data_type": "NUMERIC",
+            "c_name": "amount",
+            "spark_val": "DecimalType"
+        },
+        "gridlock_settled_id": {
+            "data_type": "INT64",
+            "c_name": "gridlock_settled_id",
+            "spark_val": "LongType"
+        },
+        "priority": {
+            "data_type": "INT64",
+            "c_name": "priority",
+            "spark_val": "LongType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        },
+        "status_type": {
+            "data_type": "STRING",
+            "c_name": "status_type_cd",
+            "spark_val": "StringType"
+        },
+        "status_change_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "status_change_time_ts",
+            "spark_val": "TimestampType"
+        },
+        "status_reason": {
+            "data_type": "STRING",
+            "c_name": "status_reason",
+            "spark_val": "StringType"
+        },
+        "status_millisecond_duration": {
+            "data_type": "INT64",
+            "c_name": "status_millisecond_duration",
+            "spark_val": "LongType"
+        }
+    },
+    "net_send_schedule": {
+        "net_send_id": {
+            "data_type": "INT64",
+            "c_name": "net_send_id",
+            "spark_val": "LongType"
+        },
+        "active_date": {
+            "data_type": "DATE",
+            "c_name": "active_date",
+            "spark_val": "DateType"
+        },
+        "delete_date": {
+            "data_type": "DATE",
+            "c_name": "delete_date",
+            "spark_val": "DateType"
+        },
+        "change_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "change_time",
+            "spark_val": "TimestampType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "contra_institution_number": {
+            "data_type": "INT64",
+            "c_name": "contra_institution_number",
+            "spark_val": "LongType"
+        },
+        "contra_institution_irn": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_irn",
+            "spark_val": "StringType"
+        },
+        "contra_institution_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_name",
+            "spark_val": "StringType"
+        },
+        "contra_institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_short_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_number": {
+            "data_type": "INT64",
+            "c_name": "contra_participant_number",
+            "spark_val": "LongType"
+        },
+        "contra_participant_bic": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_bic",
+            "spark_val": "StringType"
+        },
+        "contra_participant_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_short_name",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "day_number": {
+            "data_type": "INT64",
+            "c_name": "day_number",
+            "spark_val": "LongType"
+        },
+        "fixed_time": {
+            "data_type": "TIME",
+            "c_name": "fixed_time",
+            "spark_val": "StringType"
+        },
+        "event_trigger_code": {
+            "data_type": "STRING",
+            "c_name": "event_trigger_cd",
+            "spark_val": "StringType"
+        },
+        "event_trigger_description": {
+            "data_type": "STRING",
+            "c_name": "event_trigger_description",
+            "spark_val": "StringType"
+        },
+        "amount": {
+            "data_type": "NUMERIC",
+            "c_name": "amount",
+            "spark_val": "DecimalType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "operating_schedule": {
+        "window_log_id": {
+            "data_type": "INT64",
+            "c_name": "window_log_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "event": {
+            "data_type": "STRING",
+            "c_name": "event",
+            "spark_val": "StringType"
+        },
+        "start_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "start_ts",
+            "spark_val": "TimestampType"
+        },
+        "end_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "end_ts",
+            "spark_val": "TimestampType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "operational_status": {
+        "status_log_id": {
+            "data_type": "INT64",
+            "c_name": "status_log_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "status": {
+            "data_type": "STRING",
+            "c_name": "status_type_cd",
+            "spark_val": "StringType"
+        },
+        "effective_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "effective_ts",
+            "spark_val": "TimestampType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "net_send_override": {
+        "net_send_override_id": {
+            "data_type": "INT64",
+            "c_name": "net_send_override_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "active_date": {
+            "data_type": "DATE",
+            "c_name": "active_date",
+            "spark_val": "DateType"
+        },
+        "delete_date": {
+            "data_type": "DATE",
+            "c_name": "delete_date",
+            "spark_val": "DateType"
+        },
+        "change_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "change_time",
+            "spark_val": "TimestampType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "contra_institution_number": {
+            "data_type": "INT64",
+            "c_name": "contra_institution_number",
+            "spark_val": "LongType"
+        },
+        "contra_institution_irn": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_irn",
+            "spark_val": "StringType"
+        },
+        "contra_institution_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_name",
+            "spark_val": "StringType"
+        },
+        "contra_institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_short_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_number": {
+            "data_type": "INT64",
+            "c_name": "contra_participant_number",
+            "spark_val": "LongType"
+        },
+        "contra_participant_bic": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_bic",
+            "spark_val": "StringType"
+        },
+        "contra_participant_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_short_name",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "day_number": {
+            "data_type": "INT64",
+            "c_name": "day_number",
+            "spark_val": "LongType"
+        },
+        "fixed_time": {
+            "data_type": "TIME",
+            "c_name": "fixed_time",
+            "spark_val": "StringType"
+        },
+        "event_trigger_code": {
+            "data_type": "STRING",
+            "c_name": "event_trigger_cd",
+            "spark_val": "StringType"
+        },
+        "event_trigger_description": {
+            "data_type": "STRING",
+            "c_name": "event_trigger_description",
+            "spark_val": "StringType"
+        },
+        "amount": {
+            "data_type": "NUMERIC",
+            "c_name": "amount",
+            "spark_val": "DecimalType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "net_send_limit": {
+        "net_send_limit_id": {
+            "data_type": "INT64",
+            "c_name": "net_send_limit_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "system_reference": {
+            "data_type": "STRING",
+            "c_name": "system_reference",
+            "spark_val": "StringType"
+        },
+        "originator_reference": {
+            "data_type": "STRING",
+            "c_name": "originator_reference",
+            "spark_val": "StringType"
+        },
+        "registered_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "registered_ts",
+            "spark_val": "TimestampType"
+        },
+        "final_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "final_ts",
+            "spark_val": "TimestampType"
+        },
+        "effective_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "effective_ts",
+            "spark_val": "TimestampType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "contra_institution_number": {
+            "data_type": "INT64",
+            "c_name": "contra_institution_number",
+            "spark_val": "LongType"
+        },
+        "contra_institution_irn": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_irn",
+            "spark_val": "StringType"
+        },
+        "contra_institution_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_name",
+            "spark_val": "StringType"
+        },
+        "contra_institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_short_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_number": {
+            "data_type": "INT64",
+            "c_name": "contra_participant_number",
+            "spark_val": "LongType"
+        },
+        "contra_participant_bic": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_bic",
+            "spark_val": "StringType"
+        },
+        "contra_participant_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_short_name",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "event_trigger_code": {
+            "data_type": "STRING",
+            "c_name": "event_trigger_cd",
+            "spark_val": "StringType"
+        },
+        "event_trigger_description": {
+            "data_type": "STRING",
+            "c_name": "event_trigger_desc",
+            "spark_val": "StringType"
+        },
+        "limit_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "limit_amount",
+            "spark_val": "DecimalType"
+        },
+        "fixed_time": {
+            "data_type": "TIME",
+            "c_name": "fixed_time",
+            "spark_val": "StringType"
+        },
+        "finalized_by": {
+            "data_type": "STRING",
+            "c_name": "finalized_by",
+            "spark_val": "StringType"
+        },
+        "status": {
+            "data_type": "STRING",
+            "c_name": "status_type_cd",
+            "spark_val": "StringType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "liquidity_threshold": {
+        "create_date": {
+            "data_type": "DATE",
+            "c_name": "create_date",
+            "spark_val": "DateType"
+        },
+        "active_date": {
+            "data_type": "DATE",
+            "c_name": "active_date",
+            "spark_val": "DateType"
+        },
+        "delete_date": {
+            "data_type": "DATE",
+            "c_name": "delete_date",
+            "spark_val": "DateType"
+        },
+        "change_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "change_ts",
+            "spark_val": "TimestampType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "threshold_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "threshold_amount",
+            "spark_val": "DecimalType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "liquidity_position": {
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "sent_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "sent_amount",
+            "spark_val": "DecimalType"
+        },
+        "received_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "received_amount",
+            "spark_val": "DecimalType"
+        },
+        "liquidity_position": {
+            "data_type": "NUMERIC",
+            "c_name": "liquidity_position",
+            "spark_val": "DecimalType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "gridlock": {
+        "gridlock_participant_id": {
+            "data_type": "INT64",
+            "c_name": "gridlock_participant_id",
+            "spark_val": "LongType"
+        },
+        "gridlock_batch_id": {
+            "data_type": "INT64",
+            "c_name": "gridlock_batch_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "start_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "start_ts",
+            "spark_val": "TimestampType"
+        },
+        "end_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "end_ts",
+            "spark_val": "TimestampType"
+        },
+        "trigger": {
+            "data_type": "STRING",
+            "c_name": "trigger",
+            "spark_val": "StringType"
+        },
+        "gridlock_interval": {
+            "data_type": "INT64",
+            "c_name": "gridlock_interval",
+            "spark_val": "LongType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "begin_queue_value": {
+            "data_type": "NUMERIC",
+            "c_name": "begin_queue_value",
+            "spark_val": "DecimalType"
+        },
+        "end_queue_value": {
+            "data_type": "NUMERIC",
+            "c_name": "end_queue_value",
+            "spark_val": "DecimalType"
+        },
+        "begin_queue_volume": {
+            "data_type": "INT64",
+            "c_name": "begin_queue_volume",
+            "spark_val": "LongType"
+        },
+        "end_queue_volume": {
+            "data_type": "INT64",
+            "c_name": "end_queue_volume",
+            "spark_val": "LongType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "credit_position": {
+        "credit_entry_id": {
+            "data_type": "INT64",
+            "c_name": "credit_entry_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "event_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "event_ts",
+            "spark_val": "TimestampType"
+        },
+        "trigger_code": {
+            "data_type": "STRING",
+            "c_name": "trigger_cd",
+            "spark_val": "StringType"
+        },
+        "trigger_name": {
+            "data_type": "STRING",
+            "c_name": "trigger_name",
+            "spark_val": "StringType"
+        },
+        "total_limit": {
+            "data_type": "NUMERIC",
+            "c_name": "total_limit",
+            "spark_val": "DecimalType"
+        },
+        "total_available": {
+            "data_type": "NUMERIC",
+            "c_name": "total_available",
+            "spark_val": "DecimalType"
+        },
+        "entry_type_code": {
+            "data_type": "STRING",
+            "c_name": "entry_type_cd",
+            "spark_val": "StringType"
+        },
+        "entry_type_name": {
+            "data_type": "STRING",
+            "c_name": "entry_type_name",
+            "spark_val": "StringType"
+        },
+        "entry_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "entry_amount",
+            "spark_val": "DecimalType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "credit_activity": {
+        "credit_activity_id": {
+            "data_type": "INT64",
+            "c_name": "credit_activity_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "system_reference": {
+            "data_type": "STRING",
+            "c_name": "system_reference_cd",
+            "spark_val": "StringType"
+        },
+        "total_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "total_amount",
+            "spark_val": "DecimalType"
+        },
+        "earmarked_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "earmarked_amount",
+            "spark_val": "DecimalType"
+        },
+        "earmarked_lom": {
+            "data_type": "STRING",
+            "c_name": "earmarked_lom",
+            "spark_val": "StringType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        },
+        "status_type": {
+            "data_type": "STRING",
+            "c_name": "status_type_cd",
+            "spark_val": "StringType"
+        },
+        "status_change_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "status_change_time",
+            "spark_val": "TimestampType"
+        },
+        "status_reason": {
+            "data_type": "STRING",
+            "c_name": "status_reason_cd",
+            "spark_val": "StringType"
+        }
+    },
+    "loan": {
+        "loan_entry_id": {
+            "data_type": "INT64",
+            "c_name": "loan_entry_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "account_id": {
+            "data_type": "INT64",
+            "c_name": "account_id",
+            "spark_val": "LongType"
+        },
+        "account_bban": {
+            "data_type": "STRING",
+            "c_name": "account_bban",
+            "spark_val": "StringType"
+        },
+        "system_reference": {
+            "data_type": "STRING",
+            "c_name": "system_reference_cd",
+            "spark_val": "StringType"
+        },
+        "entry_type": {
+            "data_type": "STRING",
+            "c_name": "entry_type",
+            "spark_val": "StringType"
+        },
+        "amount": {
+            "data_type": "NUMERIC",
+            "c_name": "amount",
+            "spark_val": "DecimalType"
+        },
+        "entry_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "entry_ts",
+            "spark_val": "TimestampType"
+        },
+        "account_balance": {
+            "data_type": "NUMERIC",
+            "c_name": "account_balance",
+            "spark_val": "DecimalType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "lom_status": {
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "status": {
+            "data_type": "STRING",
+            "c_name": "status_cd",
+            "spark_val": "StringType"
+        },
+        "effective_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "effective_ts",
+            "spark_val": "TimestampType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "minum_balance": {
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "settlement_mechanism": {
+            "data_type": "STRING",
+            "c_name": "settlement_mechanism_cd",
+            "spark_val": "StringType"
+        },
+        "minimum_amount": {
+            "data_type": "NUMERIC",
+            "c_name": "minimum_amount",
+            "spark_val": "DecimalType"
+        },
+        "met_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "met_ts",
+            "spark_val": "TimestampType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        }
+    },
+    "pause_payments": {
+        "pause_payments_id": {
+            "data_type": "INT64",
+            "c_name": "pause_payments_id",
+            "spark_val": "LongType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "originator_reference": {
+            "data_type": "STRING",
+            "c_name": "originator_reference",
+            "spark_val": "StringType"
+        },
+        "registered_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "registered_ts",
+            "spark_val": "TimestampType"
+        },
+        "effective_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "effective_ts",
+            "spark_val": "TimestampType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        },
+        "contra_institution_action": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_action",
+            "spark_val": "StringType"
+        },
+        "contra_institution_number": {
+            "data_type": "INT64",
+            "c_name": "contra_institution_number",
+            "spark_val": "LongType"
+        },
+        "contra_institution_irn": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_irn",
+            "spark_val": "StringType"
+        },
+        "contra_institution_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_name",
+            "spark_val": "StringType"
+        },
+        "contra_institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_institution_short_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_number": {
+            "data_type": "INT64",
+            "c_name": "contra_participant_number",
+            "spark_val": "LongType"
+        },
+        "contra_participant_bic": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_bic",
+            "spark_val": "StringType"
+        },
+        "contra_participant_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_name",
+            "spark_val": "StringType"
+        },
+        "contra_participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "contra_participant_short_name",
+            "spark_val": "StringType"
+        }
+    },
+    "transfer": {
+        "transfer_id": {
+            "data_type": "INT64",
+            "c_name": "transfer_id",
+            "spark_val": "LongType"
+        },
+        "system_reference": {
+            "data_type": "STRING",
+            "c_name": "system_reference",
+            "spark_val": "StringType"
+        },
+        "payer_reference": {
+            "data_type": "STRING",
+            "c_name": "payer_reference",
+            "spark_val": "StringType"
+        },
+        "cycle_date": {
+            "data_type": "DATE",
+            "c_name": "cycle_date",
+            "spark_val": "DateType"
+        },
+        "institution_number": {
+            "data_type": "INT64",
+            "c_name": "institution_number",
+            "spark_val": "LongType"
+        },
+        "institution_irn": {
+            "data_type": "STRING",
+            "c_name": "institution_irn",
+            "spark_val": "StringType"
+        },
+        "institution_name": {
+            "data_type": "STRING",
+            "c_name": "institution_name",
+            "spark_val": "StringType"
+        },
+        "institution_short_name": {
+            "data_type": "STRING",
+            "c_name": "institution_short_name",
+            "spark_val": "StringType"
+        },
+        "participant_number": {
+            "data_type": "INT64",
+            "c_name": "participant_number",
+            "spark_val": "LongType"
+        },
+        "participant_bic": {
+            "data_type": "STRING",
+            "c_name": "participant_bic",
+            "spark_val": "StringType"
+        },
+        "participant_name": {
+            "data_type": "STRING",
+            "c_name": "participant_name",
+            "spark_val": "StringType"
+        },
+        "participant_short_name": {
+            "data_type": "STRING",
+            "c_name": "participant_short_name",
+            "spark_val": "StringType"
+        },
+        "from_account_id": {
+            "data_type": "INT64",
+            "c_name": "from_account_id",
+            "spark_val": "LongType"
+        },
+        "from_account_bban": {
+            "data_type": "STRING",
+            "c_name": "from_account_bban",
+            "spark_val": "StringType"
+        },
+        "from_account_name": {
+            "data_type": "STRING",
+            "c_name": "from_account_name",
+            "spark_val": "StringType"
+        },
+        "from_settle_mech": {
+            "data_type": "STRING",
+            "c_name": "from_settle_mech_cd",
+            "spark_val": "StringType"
+        },
+        "to_account_id": {
+            "data_type": "INT64",
+            "c_name": "to_account_id",
+            "spark_val": "LongType"
+        },
+        "to_account_bban": {
+            "data_type": "STRING",
+            "c_name": "to_account_bban",
+            "spark_val": "StringType"
+        },
+        "to_account_name": {
+            "data_type": "STRING",
+            "c_name": "to_account_name",
+            "spark_val": "StringType"
+        },
+        "to_settle_mech": {
+            "data_type": "STRING",
+            "c_name": "to_settle_mech_cd",
+            "spark_val": "StringType"
+        },
+        "transaction_type": {
+            "data_type": "STRING",
+            "c_name": "transaction_type",
+            "spark_val": "StringType"
+        },
+        "amount": {
+            "data_type": "NUMERIC",
+            "c_name": "amount",
+            "spark_val": "DecimalType"
+        },
+        "last_modified": {
+            "data_type": "TIMESTAMP",
+            "c_name": "last_modified_ts",
+            "spark_val": "TimestampType"
+        },
+        "status_type": {
+            "data_type": "STRING",
+            "c_name": "status_type_cd",
+            "spark_val": "StringType"
+        },
+        "status_change_time": {
+            "data_type": "TIMESTAMP",
+            "c_name": "status_change_ts",
+            "spark_val": "TimestampType"
+        },
+        "status_reason": {
+            "data_type": "STRING",
+            "c_name": "status_reason",
+            "spark_val": "StringType"
+        },
+        "status_millisecond_duration": {
+            "data_type": "INT64",
+            "c_name": "status_millisecond_duration",
+            "spark_val": "LongType"
+        }
+    }
+}

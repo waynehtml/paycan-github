@@ -1,0 +1,57 @@
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - application/databricks/paycan/**
+
+resources:
+  repositories:
+    - repository: templates                     # Reference shared DevOps repo
+      type: git
+      name: lake-devops/lake-devops
+      ref: refs/heads/main
+
+pool:
+  name:  dops-prdagntpl01
+
+variables:
+- template: ../application/databricks/pipeline-configs/cac-dev.yaml
+
+extends:
+  template: pipelines/extends.yaml@templates
+  parameters:
+    deployStages:
+    - stage: archive_notebooks
+      displayName: Archive Notebooks
+      dependsOn: build
+      jobs:
+      - job: archive_notebooks
+        workspace:
+          clean: all
+        displayName: Archive Databricks Notebooks as Artifact
+        steps:
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(System.DefaultWorkingDirectory)/$(dbx_dev_repo_notebook_location)'
+              ArtifactName: 'databricks_notebooks'
+              publishLocation: 'Container'
+
+    - stage: upload_folder_dev
+      displayName: Upload to Databricks Develop
+      dependsOn: 
+        - archive_notebooks
+
+      jobs:
+      - template: databricks/upload_folder.yaml@templates
+        parameters:
+          service_connection: 'lake-dscn-bocqa01'
+          workspace_url: $(dbx_dev_workspace_url)
+          project_path: $(dbx_dev_project_path)
+          destination_path: $(dbx_dev_destination_path)
+
+
+
+
+      

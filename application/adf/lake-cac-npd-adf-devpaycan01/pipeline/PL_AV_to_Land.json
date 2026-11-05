@@ -1,0 +1,141 @@
+{
+	"name": "PL_AV_to_Land",
+	"properties": {
+		"activities": [
+			{
+				"name": "Move Files from AV to Land",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*",
+							"deleteFilesAfterCompletion": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@concat(pipeline().parameters.prm_av_directory,'/',pipeline().parameters.prm_date)",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_land_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(pipeline().parameters.prm_land_directory, '/', pipeline().parameters.prm_date)",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete Folder in AV",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Move Files from AV to Land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@concat(pipeline().parameters.prm_av_directory,'/',pipeline().parameters.prm_date)",
+								"type": "Expression"
+							},
+							"filename": "@null"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "YYYY-MM-DD"
+			},
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory": {
+				"type": "string",
+				"defaultValue": "lynx"
+			},
+			"prm_av_directory": {
+				"type": "string",
+				"defaultValue": "lynx"
+			}
+		},
+		"folder": {
+			"name": "Lynx/Dynamic"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:28:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

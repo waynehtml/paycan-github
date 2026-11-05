@@ -1,0 +1,602 @@
+{
+	"name": "PL_ACSS_Land_to_Raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "monthly or weekly",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "var_raw_report_directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.prm_frequency,'monthly')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Move ACSS CSV Files from Land to Raw_copy1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(variables('var_land_directory'), '/acss-usbe/')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_restricted_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('var_raw_data_directory')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete Weekly Files in Land",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Move ACSS CSV Files from Land to Raw_copy1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat('acss-usbe-weekly-', pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Move ACSS CSV Files from Land to Raw",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(variables('var_land_directory'), '/Extracts/ACSS/')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_restricted_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('var_raw_data_directory')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Move USBE CSV Files from Land to Raw",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Move ACSS CSV Files from Land to Raw",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(variables('var_land_directory'), '/Extracts/USBE/')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_restricted_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('var_raw_data_directory')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Move ACSS xls Files from Land to Raw",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Move USBE CSV Files from Land to Raw",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(variables('var_land_directory'), '/Spreadsheet/ACSS/')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_restricted_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('var_raw_report_directory')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Move USBE xls Files from Land to Raw",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Move ACSS xls Files from Land to Raw",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(variables('var_land_directory'), '/Spreadsheet/USBE/')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Raw_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_restricted_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('var_raw_report_directory')",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete Monthly Files in Land",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Move USBE xls Files from Land to Raw",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_land_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat('acss-usbe-monthly-', pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "var_land_directory",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_land_directory",
+					"value": {
+						"value": "@concat(pipeline().parameters.prm_land_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_raw_data_directory",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "var_land_directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_raw_data_directory",
+					"value": {
+						"value": "@concat(pipeline().parameters.prm_raw_directory,'/',pipeline().parameters.prm_frequency,'/',pipeline().parameters.prm_date,'/')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_raw_report_directory",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "var_raw_data_directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_raw_report_directory",
+					"value": {
+						"value": "@concat(pipeline().parameters.prm_raw_directory,'/',pipeline().parameters.prm_frequency,'/',pipeline().parameters.prm_date,'/report/')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_frequency": {
+				"type": "string",
+				"defaultValue": "weekly"
+			},
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2021-11-08"
+			},
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory_base": {
+				"type": "string",
+				"defaultValue": "acss_usbe"
+			},
+			"prm_restricted_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/payments_canada/acss_usbe"
+			}
+		},
+		"variables": {
+			"var_land_directory": {
+				"type": "String"
+			},
+			"var_raw_data_directory": {
+				"type": "String"
+			},
+			"var_raw_report_directory": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": []
+	}
+}

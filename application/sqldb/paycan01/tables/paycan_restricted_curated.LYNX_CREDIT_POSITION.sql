@@ -1,0 +1,28 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_CREDIT_POSITION]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_CREDIT_POSITION];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_CREDIT_POSITION](
+	[LYNX_CREDIT_POSITION_ID] [bigint] NOT NULL,
+	[BATCH_ID] [int] NOT NULL,
+	[VALIDATION_STATUS] [bit] NULL,
+	[CREDIT_ENTRY_ID] [bigint] NULL,
+	[CYCLE_DATE] [date] NULL,
+	[INSTITUTION] [varchar](100) NULL,
+	[PARTICIPANT] [varchar](10) NULL,
+	[EVENT_TS] [datetime] NULL,
+	[TRIGGER_CD] [varchar](15) NULL,
+	[TRIGGER_NAME] [varchar](100) NULL,
+	[TOTAL_LIMIT] [decimal](22, 2) NULL,
+	[TOTAL_AVAILABLE] [decimal](22, 2) NULL,
+	[ENTRY_TYPE_CD] [varchar](15) NULL,
+	[ENTRY_TYPE_NAME] [varchar](100) NULL,
+	[ENTRY_AMOUNT] [decimal](22, 2) NULL,
+	[LAST_MODIFIED_TS] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[LYNX_CREDIT_POSITION_ID] ASC,
+	[BATCH_ID] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];
+
+

@@ -1,0 +1,49 @@
+{
+	"name": "PL_control_cibc_rbc",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run Land to Raw",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pm_run_land_to_raw,1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute Land to Raw",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_land_to_raw_cibc_rbc",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"pm_run_land_to_raw": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"var_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ACSS_participant_stream_level/Control"
+		},
+		"annotations": []
+	}
+}

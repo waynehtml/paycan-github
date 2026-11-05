@@ -1,0 +1,116 @@
+﻿CREATE   PROCEDURE [paycan_restricted_curated].[SP_MERGE_LYNX_NET_SEND_OVERRIDE]
+AS
+BEGIN
+
+MERGE [paycan_restricted_curated].[LYNX_NET_SEND_OVERRIDE] AS [Target]          
+USING [paycan_restricted_standardized].[LYNX_NET_SEND_OVERRIDE] AS [Source]           
+    ON	[Target].[LYNX_NET_SEND_OVERRIDE_ID]	= [Source].[LYNX_NET_SEND_OVERRIDE_ID] and
+		[Target].[BATCH_ID]						= [Source].[BATCH_ID]
+WHEN MATCHED THEN
+  UPDATE SET 
+	[Target].[VALIDATION_STATUS]				=	[Source].[VALIDATION_STATUS], 
+	[Target].[NET_SEND_OVERRIDE_ID]				=	[Source].[NET_SEND_OVERRIDE_ID], 
+	[Target].[CYCLE_DATE]						=	[Source].[CYCLE_DATE], 
+	[Target].[ACTIVE_DATE]						=	[Source].[ACTIVE_DATE], 
+	[Target].[DELETE_DATE]						=	[Source].[DELETE_DATE], 
+	[Target].[CHANGE_TIME]						=	[Source].[INSTITUTION_NUMBER], 
+	[Target].[INSTITUTION_NUMBER]				=	[Source].[INSTITUTION_NUMBER], 
+	[Target].[INSTITUTION_IRN]					=	[Source].[INSTITUTION_IRN], 
+	[Target].[INSTITUTION_NAME]					=	[Source].[INSTITUTION_NAME], 
+	[Target].[PARTICIPANT_NUMBER]				=	[Source].[PARTICIPANT_NUMBER],
+	[Target].[PARTICIPANT_BIC]					=	[Source].[PARTICIPANT_BIC], 
+	[Target].[PARTICIPANT_NAME]					=	[Source].[PARTICIPANT_NAME], 
+	[Target].[CONTRA_INSTITUTION_NUMBER]		=	[Source].[CONTRA_INSTITUTION_NUMBER], 
+	[Target].[CONTRA_INSTITUTION_IRN]			=	[Source].[CONTRA_INSTITUTION_IRN], 
+	[Target].[CONTRA_INSTITUTION_NAME]			=	[Source].[CONTRA_INSTITUTION_NAME], 
+	[Target].[CONTRA_PARTICIPANT_NUMBER]		=	[Source].[CONTRA_PARTICIPANT_NUMBER], 
+	[Target].[CONTRA_PARTICIPANT_BIC]			=	[Source].[CONTRA_PARTICIPANT_BIC], 
+	[Target].[CONTRA_PARTICIPANT_NAME]			=	[Source].[CONTRA_PARTICIPANT_NAME],
+	[Target].[INSTITUTION]						=	[Source].[INSTITUTION], 
+	[Target].[PARTICIPANT]						=	[Source].[PARTICIPANT], 
+	[Target].[CONTRA_INSTITUTION]				=	[Source].[CONTRA_INSTITUTION], 
+	[Target].[CONTRA_PARTICIPANT]				=	[Source].[CONTRA_PARTICIPANT], 
+	[Target].[SETTLEMENT_MECHANISM_CD]			=	[Source].[SETTLEMENT_MECHANISM_CD], 
+	[Target].[DAY_NUMBER]						=	[Source].[DAY_NUMBER], 
+	[Target].[FIXED_TIME]						=	[Source].[FIXED_TIME], 
+	[Target].[EVENT_TRIGGER_CD]					=	[Source].[EVENT_TRIGGER_CD], 
+	[Target].[EVENT_TRIGGER_DESCRIPTION]		=	[Source].[EVENT_TRIGGER_DESCRIPTION], 
+	[Target].[AMOUNT]							=	[Source].[AMOUNT], 
+	[Target].[LAST_MODIFIED_TS]					=	[Source].[LAST_MODIFIED_TS], 
+	[Target].[ingestion_date]					=	[Source].[ingestion_date],
+	[Target].[batch_date]						=	[Source].[batch_date]	
+WHEN NOT MATCHED THEN 
+	INSERT
+	(
+		[LYNX_NET_SEND_OVERRIDE_ID], 
+		[BATCH_ID], 
+		[VALIDATION_STATUS], 
+		[NET_SEND_OVERRIDE_ID], 
+		[CYCLE_DATE], 
+		[ACTIVE_DATE], 
+		[DELETE_DATE], 
+		[CHANGE_TIME], 
+		[INSTITUTION_NUMBER], 
+		[INSTITUTION_IRN], 
+		[INSTITUTION_NAME], 
+		[PARTICIPANT_NUMBER],
+		[PARTICIPANT_BIC], 
+		[PARTICIPANT_NAME], 
+		[CONTRA_INSTITUTION_NUMBER], 
+		[CONTRA_INSTITUTION_IRN], 
+		[CONTRA_INSTITUTION_NAME], 
+		[CONTRA_PARTICIPANT_NUMBER], 
+		[CONTRA_PARTICIPANT_BIC], 
+		[CONTRA_PARTICIPANT_NAME],
+		[INSTITUTION], 
+		[PARTICIPANT], 
+		[CONTRA_INSTITUTION], 
+		[CONTRA_PARTICIPANT], 
+		[SETTLEMENT_MECHANISM_CD], 
+		[DAY_NUMBER], 
+		[FIXED_TIME], 
+		[EVENT_TRIGGER_CD], 
+		[EVENT_TRIGGER_DESCRIPTION], 
+		[AMOUNT], 
+		[LAST_MODIFIED_TS], 
+		[ingestion_date],
+		[batch_date]
+	)
+	VALUES
+	(
+		[Source].[LYNX_NET_SEND_OVERRIDE_ID], 
+		[Source].[BATCH_ID], 
+		[Source].[VALIDATION_STATUS], 
+		[Source].[NET_SEND_OVERRIDE_ID], 
+		[Source].[CYCLE_DATE], 
+		[Source].[ACTIVE_DATE], 
+		[Source].[DELETE_DATE], 
+		[Source].[CHANGE_TIME], 
+		[Source].[INSTITUTION_NUMBER], 
+		[Source].[INSTITUTION_IRN], 
+		[Source].[INSTITUTION_NAME], 
+		[Source].[PARTICIPANT_NUMBER],
+		[Source].[PARTICIPANT_BIC], 
+		[Source].[PARTICIPANT_NAME], 
+		[Source].[CONTRA_INSTITUTION_NUMBER], 
+		[Source].[CONTRA_INSTITUTION_IRN], 
+		[Source].[CONTRA_INSTITUTION_NAME], 
+		[Source].[CONTRA_PARTICIPANT_NUMBER], 
+		[Source].[CONTRA_PARTICIPANT_BIC], 
+		[Source].[CONTRA_PARTICIPANT_NAME],
+		[Source].[INSTITUTION], 
+		[Source].[PARTICIPANT], 
+		[Source].[CONTRA_INSTITUTION], 
+		[Source].[CONTRA_PARTICIPANT], 
+		[Source].[SETTLEMENT_MECHANISM_CD], 
+		[Source].[DAY_NUMBER], 
+		[Source].[FIXED_TIME], 
+		[Source].[EVENT_TRIGGER_CD], 
+		[Source].[EVENT_TRIGGER_DESCRIPTION], 
+		[Source].[AMOUNT], 
+		[Source].[LAST_MODIFIED_TS], 
+		[Source].[ingestion_date],
+		[Source].[batch_date]
+	);
+
+END

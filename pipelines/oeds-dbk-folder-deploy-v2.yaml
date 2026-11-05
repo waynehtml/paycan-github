@@ -1,0 +1,123 @@
+# Shared wrapper for the existing Databricks folder upload template from lake-devops.
+# Consuming pipelines provide triggers and extend this template from their own repository.
+
+# Dependent repository variable templates:
+# - /pipelines/variables/common.yaml:
+#   - agent_pool_name
+#   - agent_image
+#   - databricks_source_folder
+#   - databricks_destination_path
+# - /pipelines/variables/dev.yaml, /pipelines/variables/stg.yaml, and /pipelines/variables/prd.yaml:
+#   - service_connection
+#   - databricks-UC01-host
+
+trigger: none
+pr: none
+
+parameters:
+  - name: environment
+    displayName: Target Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - stg
+      - prd
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: lake-devops/lake-devops
+      ref: refs/heads/main
+
+variables:
+  - template: /pipelines/variables/common.yaml@self
+
+  - ${{ if eq(parameters.environment, 'dev') }}:
+      - template: /pipelines/variables/dev.yaml@self
+  - ${{ if eq(parameters.environment, 'stg') }}:
+      - template: /pipelines/variables/stg.yaml@self
+  - ${{ if eq(parameters.environment, 'prd') }}:
+      - template: /pipelines/variables/prd.yaml@self
+
+pool:
+  name: $(agent_pool_name)
+  demands:
+    - ImageOverride -equals $(agent_image)
+
+stages:
+  - stage: ArchiveNotebooks
+    displayName: Archive Databricks notebooks
+    jobs:
+      - job: ArchiveNotebooks
+        displayName: Publish Databricks notebooks as an artifact
+        workspace:
+          clean: all
+        steps:
+          - checkout: self
+
+          - bash: |
+              set -euo pipefail
+
+              source_root="$(realpath "$SOURCE_ROOT")"
+
+              case "$REQUESTED_SOURCE_FOLDER" in
+                ''|'$('*)
+                  echo "##vso[task.logissue type=error]Source folder is missing or unresolved"
+                  exit 1
+                  ;;
+                /*)
+                  echo "##vso[task.logissue type=error]Source folder must be repository-relative"
+                  exit 1
+                  ;;
+              esac
+
+              requested_path="$source_root/$REQUESTED_SOURCE_FOLDER"
+              if [ ! -d "$requested_path" ]; then
+                echo "##vso[task.logissue type=error]Source folder does not exist: $REQUESTED_SOURCE_FOLDER"
+                exit 1
+              fi
+
+              source_directory="$(realpath "$requested_path")"
+              case "$source_directory" in
+                "$source_root"/*)
+                  ;;
+                *)
+                  echo "##vso[task.logissue type=error]Source folder must be inside the repository"
+                  exit 1
+                  ;;
+              esac
+
+              if [ -z "$(find "$source_directory" -type f -print -quit)" ]; then
+                echo "##vso[task.logissue type=error]Source folder contains no files"
+                exit 1
+              fi
+
+              echo "##vso[task.setvariable variable=VALIDATED_SOURCE_FOLDER]$source_directory"
+            displayName: Validate Databricks source folder
+            env:
+              SOURCE_ROOT: $(Build.SourcesDirectory)
+              REQUESTED_SOURCE_FOLDER: $(databricks_source_folder)
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish Databricks notebooks
+            inputs:
+              targetPath: $(VALIDATED_SOURCE_FOLDER)
+              artifact: databricks_notebooks
+              publishLocation: pipeline
+
+  - stage: UploadFolder
+    displayName: Upload Databricks folder to ${{ parameters.environment }}
+    dependsOn: ArchiveNotebooks
+    jobs:
+      - template: /pipelines/databricks/upload_folder.yaml@templates
+        parameters:
+          service_connection: $(service_connection)
+          workspace_url: $(databricks-UC01-host)
+          project_path: databricks_notebooks
+          destination_path: $(databricks_destination_path)
+          pool:
+            name: $(agent_pool_name)
+            demands:
+              - ImageOverride -equals $(agent_image)

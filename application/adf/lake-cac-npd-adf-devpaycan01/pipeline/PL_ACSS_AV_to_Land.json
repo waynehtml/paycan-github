@@ -1,0 +1,195 @@
+{
+	"name": "PL_ACSS_AV_to_Land",
+	"properties": {
+		"activities": [
+			{
+				"name": "Move Files from AV to Land",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "var_land_directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": true,
+							"deleteFilesAfterCompletion": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@variables('var_av_directory')",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_land_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@variables('var_land_directory')",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete Files in AV",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Move Files from AV to Land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_AntiVirus_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"directory": {
+								"value": "@variables('var_av_directory')",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "var_av_direcotry",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_av_directory",
+					"value": {
+						"value": "@concat(pipeline().parameters.prm_av_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "var_land_directory",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "var_av_direcotry",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_land_directory",
+					"value": {
+						"value": "@concat(pipeline().parameters.prm_land_directory_base,'-',pipeline().parameters.prm_frequency,'-',pipeline().parameters.prm_date,'/')\n",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_frequency": {
+				"type": "string",
+				"defaultValue": "monthly"
+			},
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2021-10"
+			},
+			"prm_av_directory_base": {
+				"type": "string",
+				"defaultValue": "acss_usbe"
+			},
+			"prm_land_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_land_directory_base": {
+				"type": "string",
+				"defaultValue": "acss_usbe"
+			}
+		},
+		"variables": {
+			"var_av_directory": {
+				"type": "String"
+			},
+			"var_land_directory": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:28:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

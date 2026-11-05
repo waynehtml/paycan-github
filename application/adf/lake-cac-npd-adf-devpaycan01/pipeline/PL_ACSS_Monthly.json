@@ -1,0 +1,152 @@
+{
+	"name": "PL_ACSS_Monthly",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_ACSS_Main",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set cycle date for monthly",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ACSS_Main",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"prm_frequency": "monthly",
+						"prm_date": {
+							"value": "@variables('var_date')",
+							"type": "Expression"
+						},
+						"prm_ajdust": {
+							"value": "@pipeline().parameters.prm_adjust",
+							"type": "Expression"
+						},
+						"prm_run_extract_from_GCS": {
+							"value": "@pipeline().parameters.prm_run_extract_from_GCS",
+							"type": "Expression"
+						},
+						"prm_run_AV_to_land": {
+							"value": "@pipeline().parameters.prm_run_AV_to_land",
+							"type": "Expression"
+						},
+						"prm_run_land_to_raw": {
+							"value": "@pipeline().parameters.prm_run_land_to_raw",
+							"type": "Expression"
+						},
+						"prm_run_raw_to_std": 0,
+						"prm_run_std_to_cur": 0,
+						"prm_run_sql": 0
+					}
+				}
+			},
+			{
+				"name": "Set cycle date for monthly",
+				"description": "Get last month if prm_date is not set",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Check if date is provided on adjustment",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_date",
+					"value": {
+						"value": "@if(or(equals(pipeline().parameters.prm_date,null),equals(pipeline().parameters.prm_date,'yyyy-MM')),\n formatDateTime(addToTime(utcnow(), -1, 'Month'),'yyyy-MM'),\n pipeline().parameters.prm_date\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Check if date is provided on adjustment",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(equals(pipeline().parameters.prm_adjust,0), not(or(equals(pipeline().parameters.prm_date,''),equals(pipeline().parameters.prm_date,'yyyy-MM'))))",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "date parameter missing",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "date parameter is missing when processing adjustment",
+								"errorCode": "101"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Wait_for_demo",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "PL_ACSS_Main",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			}
+		],
+		"parameters": {
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "yyyy-MM"
+			},
+			"prm_adjust": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"prm_run_extract_from_GCS": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_AV_to_land": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"prm_run_land_to_raw": {
+				"type": "int",
+				"defaultValue": 1
+			}
+		},
+		"variables": {
+			"var_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Control"
+		},
+		"annotations": []
+	}
+}

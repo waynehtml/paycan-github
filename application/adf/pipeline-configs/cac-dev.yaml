@@ -1,0 +1,11 @@
+variables:
+ - name: adf_dev_datafactory_name
+   value: lake-cac-npd-adf-devpaycan01
+ - name: adf_dev_subscription_id
+   value: 1de5fd2d-2313-461a-acc4-07cdc509cdf4
+ - name: adf_dev_resource_group
+   value: lake-cac-npd-rg-devpaycan
+ - name: adf_dev_service_connection
+   value: lake-dscn-bocqa01
+ - name: git_project_name
+   value: paycan

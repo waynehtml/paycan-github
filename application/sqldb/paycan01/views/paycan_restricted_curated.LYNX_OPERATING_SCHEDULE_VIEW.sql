@@ -1,0 +1,12 @@
+CREATE OR ALTER VIEW [paycan_restricted_curated].[LYNX_OPERATING_SCHEDULE_VIEW]
+AS SELECT [LYNX_OPERATING_SCHEDULE_ID]
+      ,[BATCH_ID]
+      ,[VALIDATION_STATUS]
+      ,[WINDOW_LOG_ID]
+      ,[CYCLE_DATE]
+      ,[EVENT]
+      ,[START_TS]
+      ,[END_TS]
+      ,[LAST_MODIFIED_TS]
+      ,[DURATION]
+FROM [paycan_restricted_curated].[LYNX_OPERATING_SCHEDULE];

@@ -1,0 +1,262 @@
+{
+	"name": "PL_Main_CDS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set loading date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_loading_date",
+					"value": {
+						"value": "@if(\n    or(\n        equals(pipeline().parameters.pm_date, ''),\n        equals(pipeline().parameters.pm_date, null)\n    ),\n    formatDateTime(addDays(addHours(utcNow(), -4), -1), 'yyyy-MM-dd'),\n    pipeline().parameters.pm_date\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Whether SFTP to Land",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set loading date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pm_sftp_to_land, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "SFTP to Land",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "1_PL_CDS_SFTP_to_Land",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"pm_date": {
+										"value": "@variables('var_loading_date')",
+										"type": "Expression"
+									},
+									"pm_file_name": {
+										"value": "@pipeline().parameters.pm_file_name",
+										"type": "Expression"
+									},
+									"pm_sftp_host": {
+										"value": "@pipeline().globalParameters.gpm_cds_config.sftp_host",
+										"type": "Expression"
+									},
+									"pm_sftp_user_name": {
+										"value": "@pipeline().globalParameters.gpm_cds_config.sftp_user_name",
+										"type": "Expression"
+									},
+									"pm_sftp_secret_name": {
+										"value": "@pipeline().globalParameters.gpm_cds_config.sftp_secret_name",
+										"type": "Expression"
+									},
+									"pm_sftp_port": 22
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Whether Land to Raw",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Whether SFTP to Land",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pm_land_to_raw, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Land to Raw",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "2_PL_CDS_Land_to_Raw",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"pm_date": {
+										"value": "@variables('var_loading_date')",
+										"type": "Expression"
+									},
+									"pm_file_name": {
+										"value": "@pipeline().parameters.pm_file_name",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Whether Raw to UC",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Whether File Validation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pm_raw_to_uc, '1')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "PL_Run_Notebook_UC",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Run_Notebook_UC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"notebook": {
+										"value": "@pipeline().globalParameters.gpm_cds_config.uc_notebook",
+										"type": "Expression"
+									},
+									"parameter": {
+										"value": "@concat(\n    '{',\n        '\"container\":\"', pipeline().globalParameters.gpm_cds_config.raw_container, '\",',\n        '\"env\":\"', pipeline().globalParameters.gpm_environment, '\",',\n        '\"file_key\":\"', pipeline().parameters.pm_file_name, '\",',\n        '\"load_type\":\"', pipeline().parameters.pm_load_type_uc, '\",',\n        '\"pull_date\":\"', variables('var_loading_date'), '\",',\n        '\"storage_name\":\"', pipeline().globalParameters.gpm_storage, '\"',\n    '}'\n)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Whether File Validation",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Whether Land to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(equals(pipeline().parameters.pm_file_validation, '1'), not(equals(toLower(pipeline().parameters.pm_load_type_uc), 'full')))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Run File Validation",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Run_Notebook_UC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"notebook": {
+										"value": "@pipeline().globalParameters.gpm_cds_config.file_validation_notebook",
+										"type": "Expression"
+									},
+									"parameter": {
+										"value": "@concat(\n  '{\"env\":\"', pipeline().globalParameters.gpm_environment,\n  '\",\"pull_date\":\"', variables('var_loading_date'),\n  '\",\"container\":\"', pipeline().globalParameters.gpm_cds_config.raw_container,\n  '\",\"storage_name\":\"\",\n  \"file_key\":\"', pipeline().parameters.pm_file_name,\n  '\"}'\n)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"pm_date": {
+				"type": "string"
+			},
+			"pm_file_name": {
+				"type": "string"
+			},
+			"pm_sftp_to_land": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"pm_land_to_raw": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"pm_raw_to_uc": {
+				"type": "string",
+				"defaultValue": "1"
+			},
+			"pm_load_type_uc": {
+				"type": "string",
+				"defaultValue": "daily"
+			},
+			"pm_file_validation": {
+				"type": "string",
+				"defaultValue": "1"
+			}
+		},
+		"variables": {
+			"var_loading_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDS/Control"
+		},
+		"annotations": []
+	}
+}

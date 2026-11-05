@@ -1,0 +1,299 @@
+{
+	"name": "PL_Raw_to_Standardized_UC",
+	"properties": {
+		"activities": [
+			{
+				"name": "File Validation",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Lookup Holidays Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "/paycan/lynx_uc/20_standardized/std_file_validation",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"file_container": {
+							"value": "@pipeline().globalParameters.gpm_container_restricted",
+							"type": "Expression"
+						},
+						"holiday_config": {
+							"value": "@string(activity('Lookup Holidays Config').output.firstRow)",
+							"type": "Expression"
+						},
+						"storage_name_restricted": {
+							"value": "@pipeline().globalParameters.gpm_storage",
+							"type": "Expression"
+						},
+						"cycle_date": {
+							"value": "@pipeline().parameters.prm_date",
+							"type": "Expression"
+						},
+						"file_path": {
+							"value": "raw/external/payments_canada/lynx",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Lookup Holidays Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_config",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "lynx",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "holidays.json",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Lookup FileNames",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Lookup FileNames').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Validate and Move to Standardized",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "/paycan/lynx_uc/20_standardized/1_std_main",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"cycle_date": {
+										"value": "@pipeline().parameters.prm_date",
+										"type": "Expression"
+									},
+									"file": {
+										"value": "@concat(string(item().name),'_',pipeline().parameters.prm_date,'.csv')",
+										"type": "Expression"
+									},
+									"config": {
+										"value": "@string(activity('Lookup Config').output.firstRow)",
+										"type": "Expression"
+									},
+									"container_name": {
+										"value": "@pipeline().globalParameters.gpm_container_restricted",
+										"type": "Expression"
+									},
+									"storage_name": {
+										"value": "@pipeline().globalParameters.gpm_storage",
+										"type": "Expression"
+									},
+									"raw_path": {
+										"value": "raw/external/payments_canada/lynx",
+										"type": "Expression"
+									},
+									"environment": {
+										"value": "@pipeline().globalParameters.gpm_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "Databricks_LS_UC",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup Config",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "File Validation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_config",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "lynx",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "files_standard_uc.json",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Lookup FileNames",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "File Validation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_config",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "lynx",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "files_ingestion.json",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"prm_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Lynx/UC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-04-26T20:28:13Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

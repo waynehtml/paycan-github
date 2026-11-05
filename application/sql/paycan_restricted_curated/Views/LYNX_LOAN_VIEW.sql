@@ -1,0 +1,17 @@
+﻿
+
+CREATE   VIEW [paycan_restricted_curated].[LYNX_LOAN_VIEW]
+AS SELECT [LYNX_LOAN_ID]
+      ,[BATCH_ID]
+      ,[VALIDATION_STATUS]
+      ,[LOAN_ENTRY_ID]
+      ,[CYCLE_DATE]
+      ,[INSTITUTION]
+      ,[PARTICIPANT]
+      ,[ACCOUNT_NAME]
+      ,[ENTRY_TYPE]
+      ,[AMOUNT]
+      ,[ENTRY_TS]
+      ,[ACCOUNT_BALANCE]
+      ,[LAST_MODIFIED_TS]
+FROM [paycan_restricted_curated].[LYNX_LOAN];

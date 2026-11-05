@@ -1,0 +1,163 @@
+{
+	"name": "2_PL_CDS_Land_to_Raw",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy from land to raw",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set source file name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_landing",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(pipeline().globalParameters.gpm_cds_config.land_path, pipeline().parameters.pm_date)",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@variables('var_source_file_name')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Raw_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_cds_config.raw_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@concat(\n    pipeline().globalParameters.gpm_cds_config.raw_path,\n    if(\n        or(\n            contains(pipeline().parameters.pm_file_name, 'CNSPOSNVAL_ABNS'),\n            contains(pipeline().parameters.pm_file_name, 'CNSPOSNVAL_EODS')\n        ),\n        'CNSPOSNVAL',\n        pipeline().parameters.pm_file_name\n    ),\n    '/',\n    pipeline().parameters.pm_date\n)",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@variables('var_source_file_name')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete the file in land",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Copy from land to raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().globalParameters.gpm_container_landing",
+								"type": "Expression"
+							},
+							"directory": "@concat('cds_oversight/', pipeline().parameters.pm_date)",
+							"filename": {
+								"value": "@variables('var_source_file_name')",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Set source file name",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var_source_file_name",
+					"value": {
+						"value": "@if(\n    equals(pipeline().parameters.pm_file_name, 'RCBSE01720EN'),\n    concat(\n        pipeline().parameters.pm_file_name,\n        formatDateTime(pipeline().parameters.pm_date, 'yyyyMMdd'),\n        '.csv'\n    ),\n    concat(\n        'BOC_',\n        pipeline().parameters.pm_file_name,\n        '_',\n        formatDateTime(pipeline().parameters.pm_date, 'yyyyMMdd'),\n        '.csv'\n    )\n)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"pm_date": {
+				"type": "string"
+			},
+			"pm_file_name": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"var_source_file_name": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDS/Dynamic"
+		},
+		"annotations": []
+	}
+}

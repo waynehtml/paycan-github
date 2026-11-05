@@ -1,0 +1,50 @@
+{
+	"name": "DS_SFTP",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SFTP",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"host": "198.235.29.5",
+				"user_name": "BoCProdStats",
+				"secret_key_vault": "tmx-cdcc-sftp-rsa-key",
+				"port": 22
+			}
+		},
+		"parameters": {
+			"host": {
+				"type": "string"
+			},
+			"user_name": {
+				"type": "string"
+			},
+			"secret_key_vault": {
+				"type": "string"
+			},
+			"sftp_folder": {
+				"type": "string"
+			},
+			"file_name": {
+				"type": "string"
+			},
+			"port": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "SftpLocation",
+				"fileName": {
+					"value": "@dataset().file_name",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().sftp_folder",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,129 @@
+{
+	"name": "PL_Run_Pipeline_with_Rest_API",
+	"properties": {
+		"activities": [
+			{
+				"name": "RunPipeline",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Set restUrl",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@variables('restUrl')",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "@pipeline().parameters.param_pipeline_param",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com/"
+					}
+				}
+			},
+			{
+				"name": "Set resourceGroupName",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "resourceGroupName",
+					"value": {
+						"value": "@concat('lake-cac-',if(equals(pipeline().globalParameters.gpm_environment, 'dev'), 'npd', 'prd'),'-rg-',pipeline().globalParameters.gpm_environment,'paycan')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set datafactoryName",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "datafactoryName",
+					"value": {
+						"value": "@pipeline().DataFactory",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set restUrl",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set datafactoryName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set resourceGroupName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "restUrl",
+					"value": {
+						"value": "@concat('https://management.azure.com/subscriptions/',pipeline().globalParameters.gpm_subscrition,'/resourceGroups/',variables('resourceGroupName'),'/providers/Microsoft.DataFactory/factories/',variables('datafactoryName'),'/pipelines/',pipeline().parameters.param_pipeline_name,'/createRun?api-version=2018-06-01')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"param_pipeline_name": {
+				"type": "string"
+			},
+			"param_pipeline_param": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"datafactoryName": {
+				"type": "String"
+			},
+			"resourceGroupName": {
+				"type": "String"
+			},
+			"restUrl": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": []
+	}
+}

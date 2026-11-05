@@ -1,0 +1,33 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[paycan_restricted_curated].[LYNX_TRANSFER]') AND type in (N'U'))
+DROP TABLE [paycan_restricted_curated].[LYNX_TRANSFER];
+
+CREATE TABLE [paycan_restricted_curated].[LYNX_TRANSFER](
+	[LYNX_TRANSFER_ID] [bigint] NOT NULL,
+	[BATCH_ID] [int] NOT NULL,
+	[VALIDATION_STATUS] [bit] NULL,
+	[TRANSFER_ID] [bigint] NULL,
+	[PAYER_REFERENCE] [varchar](50) NULL,
+	[CYCLE_DATE] [date] NULL,
+	[INSTITUTION] [varchar](100) NULL,
+	[PARTICIPANT] [varchar](100) NULL,
+	[FROM_ACCOUNT_BBAN] [varchar](20) NULL,
+	[FROM_ACCOUNT_NAME] [varchar](20) NULL,
+	[FROM_SETTLE_MECH_CD] [varchar](20) NULL,
+	[TO_ACCOUNT_BBAN] [varchar](20) NULL,
+	[TO_ACCOUNT_NAME] [varchar](255) NULL,
+	[TO_SETTLE_MECH_CD] [varchar](20) NULL,
+	[TRANSACTION_TYPE] [varchar](100) NULL,
+	[AMOUNT] [decimal](30, 2) NULL,
+	[LAST_MODIFIED_TS] [datetime] NULL,
+	[STATUS_TYPE_CD] [varchar](15) NULL,
+	[STATUS_CHANGE_TS] [datetime] NULL,
+	[STATUS_MILLISECOND_DURATION] [bigint] NULL,
+	[STATUS_TYPE_CATEGORY] [varchar](256) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[LYNX_TRANSFER_ID] ASC,
+	[BATCH_ID] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY];
+
+

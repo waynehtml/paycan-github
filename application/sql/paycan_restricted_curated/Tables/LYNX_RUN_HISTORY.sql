@@ -1,0 +1,23 @@
+﻿CREATE TABLE [paycan_restricted_curated].[LYNX_RUN_HISTORY] (
+    [ID]                            INT          IDENTITY (1, 1) NOT NULL,
+    [BATCH_ID]                      VARCHAR (10) NOT NULL,
+    [FULL_LOAD]                     BIT          NULL,
+    [RAW_TO_STANDARDIZED_START]     DATETIME     NULL,
+    [RAW_TO_STANDARDIZED_END]       DATETIME     NULL,
+    [STANDARDIZED_TO_CURATED_START] DATETIME     NULL,
+    [STANDARDIZED_TO_CURATED_END]   DATETIME     NULL,
+    [CURATED_TO_SQL_START]          DATETIME     NULL,
+    [CURATED_TO_SQL_END]            DATETIME     NULL,
+    PRIMARY KEY CLUSTERED ([ID] ASC)
+);
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UI_LYNX_RUN_HISTORY_BATCH_ID]
+    ON [paycan_restricted_curated].[LYNX_RUN_HISTORY]([BATCH_ID] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [IDX_LYNX_RUN_HISTORY_batch_id]
+    ON [paycan_restricted_curated].[LYNX_RUN_HISTORY]([BATCH_ID] ASC);
+

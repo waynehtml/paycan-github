@@ -1,0 +1,42 @@
+{
+	"name": "ACSS_Weekly",
+	"properties": {
+		"description": "Pulling ACSS weekly extracts on Monday 9AM (the extracts is available on 7AM)\n",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ACSS_Weekly",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"prm_adjust": 0,
+					"prm_run_extract_from_GCS": 1,
+					"prm_run_AV_to_land": 1,
+					"prm_run_land_to_raw": 1
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2022-02-14T14:41:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						9
+					],
+					"weekDays": [
+						"Monday"
+					]
+				}
+			}
+		}
+	}
+}

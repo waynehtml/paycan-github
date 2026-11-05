@@ -1,0 +1,41 @@
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - config-paycan/*
+
+resources:
+  repositories:
+    - repository: templates                     # Reference shared DevOps repo
+      type: git
+      name: lake-devops/lake-devops
+      ref: refs/heads/main
+
+pool:
+  name:  azdv-dagp-npdagntpl01
+    
+variables:
+- template: application/project_config/config/cac-dev.yaml
+- group: 'paycan-config-dev'
+
+extends:
+  template: pipelines/extends.yaml@templates
+  parameters:
+    deployStages:
+    - stage: sync_config_files
+      displayName: Sync Config Files
+      jobs:
+      - job:
+        steps:
+        - checkout: self
+        - publish: $(System.DefaultWorkingDirectory)/config-paycan
+          artifact: config_archive
+
+      - template: ../../pipelines/config/sync_datalake_folder.yaml@templates
+        parameters:
+          container: $(config_dev_container)
+          source_folder: $(config_dev_source_folder)
+          account_name: $(config_dev_account_name)
+          sas_token: $(paycan-config-sas-token)

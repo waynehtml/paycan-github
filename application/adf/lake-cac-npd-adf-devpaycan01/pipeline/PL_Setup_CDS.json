@@ -1,0 +1,34 @@
+{
+	"name": "PL_Setup_CDS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute setup script UC",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Run_Notebook_UC",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"notebook": "/paycan/cds/00_setup",
+						"parameter": {
+							"value": "@concat('{\"environment\":\"', pipeline().globalParameters.gpm_environment, '\"}')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "CDS"
+		},
+		"annotations": []
+	}
+}

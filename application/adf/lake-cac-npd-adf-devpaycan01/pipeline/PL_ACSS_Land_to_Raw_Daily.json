@@ -1,0 +1,357 @@
+{
+	"name": "PL_ACSS_Land_to_Raw_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Config_JSON_file",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_config_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_config_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.prm_filenames",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Loop on File names",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@array(activity('Get Config').output.firstRow.filenames)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Check_file_exists",
+							"type": "GetMetadata",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_landing_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_landing_directory,'/',pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.csv')",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"exists"
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							}
+						},
+						{
+							"name": "If file exists",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Check_dir_count",
+									"dependencyConditions": [
+										"Succeeded",
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@and(\n    activity('Check_file_exists').output.exists,\n    equals(length(activity('Check_dir_count').output.childItems), 1)\n)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Fail1",
+										"type": "Fail",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"message": "Failed",
+											"errorCode": "Copy activity failed"
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "Move File to Raw Zone",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "BinarySource",
+												"storeSettings": {
+													"type": "AzureBlobFSReadSettings",
+													"recursive": true
+												},
+												"formatSettings": {
+													"type": "BinaryReadSettings"
+												}
+											},
+											"sink": {
+												"type": "BinarySink",
+												"storeSettings": {
+													"type": "AzureBlobFSWriteSettings"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_Land_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@pipeline().parameters.prm_landing_container",
+														"type": "Expression"
+													},
+													"directory": {
+														"value": "@concat(pipeline().parameters.prm_landing_directory,'/',pipeline().parameters.prm_date)",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.csv')",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_Raw_Binary_File",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@pipeline().parameters.prm_raw_container",
+														"type": "Expression"
+													},
+													"directory": {
+														"value": "@concat(pipeline().parameters.prm_raw_directory,'/',pipeline().parameters.prm_date)",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@concat(item().name,'_',pipeline().parameters.prm_date,'.csv')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								]
+							}
+						},
+						{
+							"name": "Check_dir_count",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "Check_file_exists",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Land_Binary_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.prm_landing_container",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@concat(pipeline().parameters.prm_landing_directory,'/',pipeline().parameters.prm_date)",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@null",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"childItems"
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Delete Files from Landing",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Loop on File names",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Land_Binary_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.prm_landing_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.prm_landing_directory",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@null",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"parameters": {
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2023-10-30"
+			},
+			"prm_landing_container": {
+				"type": "string",
+				"defaultValue": "land-paycan"
+			},
+			"prm_landing_directory": {
+				"type": "string",
+				"defaultValue": "acss/intraday"
+			},
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/payments_canada/acss/intraday"
+			},
+			"prm_config_container": {
+				"type": "string",
+				"defaultValue": "config-paycan"
+			},
+			"prm_config_directory": {
+				"type": "string",
+				"defaultValue": "acss"
+			},
+			"prm_filenames": {
+				"type": "string",
+				"defaultValue": "acss_files_ingestion_intraday.json"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,96 @@
+{
+	"name": "PL_ACSS_Raw_to_Standardized_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "Validation",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/acss_intraday/20_standardized/data_validation_acss_intraday",
+					"baseParameters": {
+						"cycle_date": {
+							"value": "@pipeline().parameters.prm_date",
+							"type": "Expression"
+						},
+						"storage_name": {
+							"value": "@pipeline().parameters.prm_storage",
+							"type": "Expression"
+						},
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Standardization",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Validation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/acss_intraday/20_standardized/raw_to_standardized_acss_intraday",
+					"baseParameters": {
+						"cycle_date": {
+							"value": "@pipeline().parameters.prm_date",
+							"type": "Expression"
+						},
+						"storage_name": {
+							"value": "@pipeline().parameters.prm_storage",
+							"type": "Expression"
+						},
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"prm_date": {
+				"type": "string",
+				"defaultValue": "2023-10-18"
+			},
+			"prm_storage": {
+				"type": "string",
+				"defaultValue": "lakecacnpdstdev01"
+			}
+		},
+		"folder": {
+			"name": "ACSS/Dynamic"
+		},
+		"annotations": []
+	}
+}

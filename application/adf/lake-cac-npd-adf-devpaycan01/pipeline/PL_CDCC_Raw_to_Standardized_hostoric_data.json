@@ -1,0 +1,55 @@
+{
+	"name": "PL_CDCC_Raw_to_Standardized_hostoric_data",
+	"properties": {
+		"activities": [
+			{
+				"name": "Raw to Standardized - Historic data",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/paycan/cdcc/20_standardized/cdcc_load_historic_data",
+					"baseParameters": {
+						"environment": {
+							"value": "@pipeline().globalParameters.gpm_environment",
+							"type": "Expression"
+						},
+						"prm_raw_container": {
+							"value": "@pipeline().parameters.prm_raw_container",
+							"type": "Expression"
+						},
+						"prm_raw_directory": {
+							"value": "@pipeline().parameters.prm_raw_directory",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Databricks_LS_UC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"prm_raw_container": {
+				"type": "string",
+				"defaultValue": "restricted"
+			},
+			"prm_raw_directory": {
+				"type": "string",
+				"defaultValue": "raw/external/tmx/cdcc/historic_data/working"
+			}
+		},
+		"folder": {
+			"name": "CDCC/Dynamic"
+		},
+		"annotations": []
+	}
+}

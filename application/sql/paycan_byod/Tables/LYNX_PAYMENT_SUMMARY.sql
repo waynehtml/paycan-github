@@ -1,0 +1,25 @@
+﻿CREATE TABLE [paycan_byod].[LYNX_PAYMENT_SUMMARY] (
+    [BATCH_ID]                INT                NULL,
+    [PAYMENT_ID]              BIGINT             NULL,
+    [SYSTEM_REFERENCE]        VARCHAR (100)      NULL,
+    [CYCLE_DATE]              DATE               NULL,
+    [PAYER_INSTITUTION]       VARCHAR (100)      NULL,
+    [PAYER_PARTICIPANT]       VARCHAR (100)      NULL,
+    [SETTLEMENT_MECHANISM_CD] VARCHAR (100)      NULL,
+    [RECEIVER_INSTITUTION]    VARCHAR (100)      NULL,
+    [RECEIVER_PARTICIPANT]    VARCHAR (100)      NULL,
+    [SWIFT_MSG_TYPE_CD]       VARCHAR (100)      NULL,
+    [TRANSACTION_TYPE]        VARCHAR (100)      NULL,
+    [AMOUNT]                  DECIMAL (22, 2)    NULL,
+    [PRIORITY]                BIGINT             NULL,
+    [REGISTERED_TIME]         DATETIME           NULL,
+    [SETTLED_TIME]            DATETIME           NULL,
+    [PROCESSED_TIME]          DATETIME           NULL,
+    [QUEUED_TIME]             DATETIMEOFFSET (7) NULL,
+    [REGISTERED]              TINYINT            NULL,
+    [SETTLED]                 TINYINT            NULL,
+    [PROCESSED]               TINYINT            NULL,
+    [QUEUED]                  TINYINT            NULL,
+    [TOTAL_DURATION]          BIGINT             NULL
+);
+

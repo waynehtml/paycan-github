@@ -1,0 +1,16 @@
+﻿CREATE TABLE [paycan_byod].[LYNX_CREDIT_ACTIVITY_SUMMARY] (
+    [BATCH_ID]           INT             NULL,
+    [CREDIT_ACTIVITY_ID] BIGINT          NULL,
+    [CYCLE_DATE]         DATE            NULL,
+    [INSTITUTION]        VARCHAR (100)   NULL,
+    [PARTICIPANT]        VARCHAR (100)   NULL,
+    [TOTAL_AMOUNT]       DECIMAL (22, 2) NULL,
+    [EARMARKED_AMOUNT]   DECIMAL (22, 2) NULL,
+    [EARMARKED_LOM]      VARCHAR (100)   NULL,
+    [REGISTERED_TIME]    DATETIME        NULL,
+    [PROCESSED_TIME]     DATETIME        NULL,
+    [REGISTERED]         TINYINT         NULL,
+    [PROCESSED]          TINYINT         NULL,
+    [TOTAL_DURATION]     BIGINT          NULL
+);
+

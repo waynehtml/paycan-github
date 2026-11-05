@@ -1,0 +1,23 @@
+﻿
+
+
+CREATE   VIEW [paycan_restricted_curated].[LYNX_TRANSFER_SUMMARY_VIEW]
+AS SELECT [BATCH_ID]
+      ,[TRANSFER_ID]
+      ,[PAYER_REFERENCE]
+      ,[CYCLE_DATE]
+      ,[INSTITUTION]
+      ,[PARTICIPANT]
+      ,[FROM_ACCOUNT_BBAN]
+      ,[FROM_ACCOUNT_NAME]
+      ,[FROM_SETTLE_MECH_CD]
+      ,[TO_ACCOUNT_BBAN]
+      ,[TO_ACCOUNT_NAME]
+      ,[TO_SETTLE_MECH_CD]
+      ,[TRANSACTION_TYPE]
+      ,[AMOUNT]
+      ,[REGISTERED]
+      ,[SETTLED]
+      ,[REGISTERED_TIME]
+      ,[SETTLED_TIME]
+  FROM [paycan_restricted_curated].[LYNX_TRANSFER_SUMMARY];

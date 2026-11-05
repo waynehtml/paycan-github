@@ -1,0 +1,9 @@
+{
+    "projects": [
+      {
+        "name": "paycan",
+        "root": "/config-paycan/alert_service/paycan/"
+      }
+    ]
+  }
+  
